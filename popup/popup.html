@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { width: 520px; max-height: 560px; overflow-y: auto; font-family: -apple-system, "PingFang SC", sans-serif; background: #fafafa; }
+    html, body { overflow: hidden; min-width: 0; }
+    body { width: 520px; font-family: -apple-system, "PingFang SC", "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif; }
+    .popup-root { width: 100%; max-width: 100%; max-height: 560px; overflow-y: auto; overflow-x: hidden; background: #fafafa; }
+    img, svg, canvas { display: block; max-width: 100%; }
     header { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #eee; padding: 12px 14px; z-index: 10; }
     .title-row { display: flex; align-items: center; justify-content: space-between; }
     h1 { font-size: 15px; font-weight: 600; }
@@ -65,29 +68,43 @@
     .sync-menu button:hover { background: #f5f5f5; }
     .sync-menu .p-name { display: block; font-size: 13px; color: #333; white-space: nowrap; }
     .sync-menu .p-time { display: block; font-size: 10px; color: #b8b8b8; margin-top: 1px; white-space: nowrap; }
+    .update-bar { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 7px 10px; background: #e6f4ff; border: 1px solid #91caff; border-radius: 8px; font-size: 12px; color: #0958d9; }
+    .update-bar[hidden] { display: none; }
+    .update-bar .u-text { flex: 1; }
+    .update-bar .u-go { font-size: 12px; color: #fff; background: #1677ff; border: none; border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+    .update-bar .u-go:hover { background: #0958d9; }
+    .update-bar .u-x { border: none; background: none; color: #69b1ff; font-size: 15px; line-height: 1; padding: 0 2px; cursor: pointer; }
+    .update-bar .u-x:hover { color: #0958d9; }
   </style>
 </head>
 <body>
+  <div class="popup-root">
   <header>
     <div class="title-row">
-      <h1>待会再看<span class="unread" id="unread" style="display:none"></span></h1>
+      <h1><span data-i18n="extName">MarkSync</span><span class="unread" id="unread" style="display:none"></span></h1>
       <div class="actions">
-        <button id="btn-export">导出</button>
-        <button id="btn-read-all">全部已读</button>
+        <button id="btn-export" data-i18n="btnExport">导出</button>
+        <button id="btn-read-all" data-i18n="btnReadAll">全部已读</button>
         <div class="split-btn">
-          <button id="btn-run" class="primary">同步</button>
-          <button id="btn-run-more" class="primary caret" title="选择平台单独同步">▾</button>
+          <button id="btn-run" class="primary" data-i18n="btnSync">同步</button>
+          <button id="btn-run-more" class="primary caret" data-i18n-title="btnRunMoreTitle" title="选择平台单独同步">▾</button>
           <div id="sync-menu" class="sync-menu" hidden></div>
         </div>
-        <button id="btn-settings">设置</button>
+        <button id="btn-settings" data-i18n="btnSettings">设置</button>
       </div>
+    </div>
+    <div class="update-bar" id="update-bar" hidden>
+      <span class="u-text" id="update-text"></span>
+      <button class="u-go" id="update-go"></button>
+      <button class="u-x" id="update-dismiss">×</button>
     </div>
     <div class="status" id="status"></div>
     <div class="login-bar" id="login-bar"></div>
     <div class="tabs" id="tabs"></div>
-    <div class="running-tip" id="running-tip">正在后台检测，请稍候…</div>
+    <div class="running-tip" id="running-tip" data-i18n="runningTip">正在后台检测，请稍候…</div>
   </header>
   <main id="list"></main>
+  </div>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

@@ -1,0 +1,331 @@
+{
+  "extName": {
+    "message": "MarkSync",
+    "description": "Extension name"
+  },
+  "extDesc": {
+    "message": "Syncs new saves and likes from Xiaohongshu, Douyin, YouTube, X, TikTok and Instagram into one list — so the things you saved for later actually get looked at."
+  },
+  "plat_xhs": {
+    "message": "Xiaohongshu"
+  },
+  "plat_douyin": {
+    "message": "Douyin"
+  },
+  "plat_youtube": {
+    "message": "YouTube"
+  },
+  "plat_x": {
+    "message": "X"
+  },
+  "plat_tiktok": {
+    "message": "TikTok"
+  },
+  "plat_instagram": {
+    "message": "Instagram"
+  },
+  "src_xhs_fav": {
+    "message": "Xiaohongshu Saves"
+  },
+  "src_xhs_like": {
+    "message": "Xiaohongshu Likes"
+  },
+  "src_dy_fav": {
+    "message": "Douyin Saves"
+  },
+  "src_dy_like": {
+    "message": "Douyin Likes"
+  },
+  "src_yt_like": {
+    "message": "YouTube Liked"
+  },
+  "src_yt_watch": {
+    "message": "YouTube Watch Later"
+  },
+  "src_x_bookmark": {
+    "message": "X Bookmarks"
+  },
+  "src_x_like": {
+    "message": "X Likes"
+  },
+  "src_tt_fav": {
+    "message": "TikTok Favorites"
+  },
+  "src_tt_like": {
+    "message": "TikTok Likes"
+  },
+  "src_ig_fav": {
+    "message": "Instagram Saved"
+  },
+  "src_ig_like": {
+    "message": "Instagram Likes"
+  },
+  "srcs_xhs_fav": {
+    "message": "Saves",
+    "description": "Short checkbox label in options; platform name comes from the group heading"
+  },
+  "srcs_xhs_like": {
+    "message": "Likes"
+  },
+  "srcs_dy_fav": {
+    "message": "Saves"
+  },
+  "srcs_dy_like": {
+    "message": "Likes"
+  },
+  "srcs_yt_like": {
+    "message": "Liked"
+  },
+  "srcs_yt_watch": {
+    "message": "Watch Later"
+  },
+  "srcs_x_bookmark": {
+    "message": "Bookmarks"
+  },
+  "srcs_x_like": {
+    "message": "Likes"
+  },
+  "srcs_tt_fav": {
+    "message": "Favorites"
+  },
+  "srcs_tt_like": {
+    "message": "Likes"
+  },
+  "srcs_ig_fav": {
+    "message": "Saved"
+  },
+  "srcs_ig_like": {
+    "message": "Likes"
+  },
+  "tabRecent": {
+    "message": "Latest"
+  },
+  "btnExport": {
+    "message": "Export"
+  },
+  "btnReadAll": {
+    "message": "Mark all read"
+  },
+  "btnSync": {
+    "message": "Sync"
+  },
+  "btnSettings": {
+    "message": "Settings"
+  },
+  "btnRunMoreTitle": {
+    "message": "Sync a single platform"
+  },
+  "runningTip": {
+    "message": "Checking in the background, hang tight…"
+  },
+  "btnMarkRead": {
+    "message": "Read"
+  },
+  "itemUntitled": {
+    "message": "(untitled)"
+  },
+  "statusNoNetwork": {
+    "message": "No network"
+  },
+  "statusNoNetworkHint": {
+    "message": " — will sync automatically once you are back online (retrying every 3 minutes)"
+  },
+  "statusNeverRun": {
+    "message": "Never checked yet. Hit Sync to start."
+  },
+  "statusLastCheck": {
+    "message": "Last check $1"
+  },
+  "statusNextRun": {
+    "message": ", next $1"
+  },
+  "statusAllOk": {
+    "message": " · all good"
+  },
+  "statusFail": {
+    "message": "$1 failed: $2"
+  },
+  "btnGoLogin": {
+    "message": "Log in"
+  },
+  "loginBarTip": {
+    "message": "Not logged in — log in first to enable checks:"
+  },
+  "btnLoginWith": {
+    "message": "Log in to $1"
+  },
+  "emptyList": {
+    "message": "Nothing here yet. Save something on Xiaohongshu or Douyin, then hit Sync."
+  },
+  "syncPlatform": {
+    "message": "Sync $1"
+  },
+  "lastSyncAt": {
+    "message": "Last sync $1"
+  },
+  "neverSynced": {
+    "message": "Never synced"
+  },
+  "nextSyncAt": {
+    "message": "Next sync $1"
+  },
+  "alertEmptyExport": {
+    "message": "The list is empty — nothing to export."
+  },
+  "csvColSource": {
+    "message": "Source"
+  },
+  "csvColTitle": {
+    "message": "Title"
+  },
+  "csvColAuthor": {
+    "message": "Author"
+  },
+  "csvColLink": {
+    "message": "Link"
+  },
+  "csvColStatus": {
+    "message": "Status"
+  },
+  "csvColDiscovered": {
+    "message": "Discovered"
+  },
+  "csvColDesc": {
+    "message": "Description"
+  },
+  "csvStatusNew": {
+    "message": "Unread"
+  },
+  "csvStatusRead": {
+    "message": "Read"
+  },
+  "csvFilename": {
+    "message": "marksync_$1.csv"
+  },
+  "optionsTitle": {
+    "message": "MarkSync · Settings"
+  },
+  "optSecInterval": {
+    "message": "Checking"
+  },
+  "optLabelInterval": {
+    "message": "Auto-check interval"
+  },
+  "unitMinute": {
+    "message": "minutes"
+  },
+  "unitHour": {
+    "message": "hours"
+  },
+  "unitDay": {
+    "message": "days"
+  },
+  "optSecSources": {
+    "message": "Platforms & content to sync"
+  },
+  "optHintSources": {
+    "message": "Only checked items are looked at. Unchecked ones are skipped."
+  },
+  "btnSave": {
+    "message": "Save"
+  },
+  "optSecData": {
+    "message": "Data"
+  },
+  "btnClear": {
+    "message": "Clear list and re-import everything"
+  },
+  "msgSaved": {
+    "message": "Saved"
+  },
+  "msgSavedClamped": {
+    "message": "Saved (Chrome's minimum is 0.5 minutes — adjusted automatically)"
+  },
+  "confirmClear": {
+    "message": "Clear the entire list and read history? The next check will re-import everything."
+  },
+  "msgCleared": {
+    "message": "Cleared. Hit Sync in the popup to re-import."
+  },
+  "notifTitle": {
+    "message": "$1 new saves/likes added to MarkSync"
+  },
+  "notifBody": {
+    "message": "$1 — click to open the list"
+  },
+  "notifMore": {
+    "message": " and more"
+  },
+  "notifFallback": {
+    "message": "Click to open the list"
+  },
+  "errXhsNoUid": {
+    "message": "No profile link found (maybe not logged in)"
+  },
+  "errXhsUidFail": {
+    "message": "Could not resolve uid"
+  },
+  "errNoContent": {
+    "message": "Nothing captured (maybe not logged in, or the list is empty)"
+  },
+  "errSsrBroken": {
+    "message": "Unexpected page data structure"
+  },
+  "errNoContentOrLogin": {
+    "message": "Nothing captured (maybe not logged in, or the API changed)"
+  },
+  "errMissingUsername": {
+    "message": "Could not get the username (maybe not logged in)"
+  },
+  "errXhsSsrNoData": {
+    "message": "No SSR data on the page (maybe not logged in)"
+  },
+  "errYtNoData": {
+    "message": "No ytInitialData on the page (maybe not logged in)"
+  },
+  "errIgBlocked": {
+    "message": "Endpoint returned $1"
+  },
+  "errXhsTabMissing": {
+    "message": "Tab not found (the saves tab did not load, or there is nothing in it)"
+  },
+  "errTabTimeout": {
+    "message": "Page load timed out"
+  },
+  "errContentTimeout": {
+    "message": "The page script was not ready"
+  },
+  "errWindowFailed": {
+    "message": "Could not create a background window"
+  },
+  "errNotLoggedInPlatform": {
+    "message": "Not logged in to $1"
+  },
+  "errCaptureFailed": {
+    "message": "Capture failed"
+  },
+  "titleDouyinVideo": {
+    "message": "Douyin video"
+  },
+  "titleTikTokVideo": {
+    "message": "TikTok video"
+  },
+  "titleIgPost": {
+    "message": "Instagram post"
+  },
+  "titleXTweet": {
+    "message": "X post"
+  },
+  "titleXUserTweet": {
+    "message": "Post by $1"
+  },
+  "updateAvailable": {
+    "message": "Version $1 is available"
+  },
+  "updateNow": {
+    "message": "Update"
+  },
+  "updateDismiss": {
+    "message": "Skip this version"
+  }
+}

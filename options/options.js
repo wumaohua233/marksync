@@ -1,8 +1,16 @@
 // options：检测间隔设置与数据重置。
 
 import * as store from "../lib/store.js";
+import { t, applyI18n } from "../lib/i18n.js";
+
+applyI18n();
 
 const $ = (id) => document.getElementById(id);
+
+const escapeHtml = (s) =>
+  String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
 
 function showMsg(text, ok) {
   const el = $("msg");
@@ -11,23 +19,25 @@ function showMsg(text, ok) {
   setTimeout(() => { el.textContent = ""; }, 6000);
 }
 
-const PLATFORM_NAMES = { xhs: "小红书", douyin: "抖音", youtube: "YouTube", x: "X", tiktok: "TikTok", instagram: "Instagram" };
-
 // 按平台分组渲染数据源开关；勾选状态来自 settings.sources
 function renderSources(sources) {
   const groups = {};
   for (const [key, meta] of Object.entries(store.SOURCES)) {
-    (groups[meta.platform] = groups[meta.platform] || []).push([key, meta]);
+    (groups[meta.platform] = groups[meta.platform] || []).push(key);
   }
   let html = "";
-  for (const [plat, list] of Object.entries(groups)) {
-    const items = list
-      .map(([key, meta]) => {
-        const short = meta.label.replace(PLATFORM_NAMES[plat] || "", "").trim() || meta.label;
-        return `<label class="src-item"><input type="checkbox" data-source="${key}"${sources[key] ? " checked" : ""}> ${short}</label>`;
-      })
+  for (const [plat, keys] of Object.entries(groups)) {
+    const items = keys
+      .map(
+        (key) =>
+          `<label class="src-item"><input type="checkbox" data-source="${key}"${
+            sources[key] ? " checked" : ""
+          }> ${escapeHtml(store.sourceShortLabel(key))}</label>`
+      )
       .join("");
-    html += `<div class="src-group"><span class="src-plat">${PLATFORM_NAMES[plat] || plat}</span><div class="src-items">${items}</div></div>`;
+    html += `<div class="src-group"><span class="src-plat">${escapeHtml(
+      store.platformLabel(plat)
+    )}</span><div class="src-items">${items}</div></div>`;
   }
   $("sources").innerHTML = html;
 }
@@ -58,10 +68,10 @@ $("btn-save").addEventListener("click", async () => {
   const raw = parseFloat($("intervalValue").value);
   const unit = parseInt($("intervalUnit").value, 10) || 60;
   let mins = Number.isFinite(raw) && raw > 0 ? raw * unit : 180;
-  let note = "已保存";
+  let note = t("msgSaved");
   if (mins < 0.5) {
     mins = 0.5; // Chrome alarms 最小周期 30 秒
-    note = "已保存（Chrome 限制最短 0.5 分钟，已自动调整）";
+    note = t("msgSavedClamped");
   }
   s.intervalMinutes = mins;
   delete s.intervalHours; // 清掉旧字段
@@ -71,9 +81,9 @@ $("btn-save").addEventListener("click", async () => {
 });
 
 $("btn-clear").addEventListener("click", async () => {
-  if (!confirm("确定清空全部清单与已读记录？下次检测将重新全量导入。")) return;
+  if (!confirm(t("confirmClear"))) return;
   await chrome.runtime.sendMessage({ type: "CLEAR_ALL" });
-  showMsg("已清空，点插件图标里的「同步」重新导入", true);
+  showMsg(t("msgCleared"), true);
 });
 
 load();

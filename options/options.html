@@ -2,10 +2,10 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>收藏提醒 - 设置</title>
+  <title data-i18n="optionsTitle">MarkSync · 设置</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, "PingFang SC", sans-serif; background: #fafafa; color: #333; }
+    body { font-family: -apple-system, "PingFang SC", "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif; background: #fafafa; color: #333; }
     .wrap { max-width: 560px; margin: 40px auto; background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 28px 32px; }
     h1 { font-size: 18px; margin-bottom: 24px; }
     h2 { font-size: 14px; margin: 24px 0 12px; color: #666; font-weight: 600; }
@@ -26,9 +26,6 @@
     #msg.ok { color: #52c41a; }
     #msg.err { color: #d4380d; }
     .hint { font-size: 12px; color: #999; margin-top: -8px; margin-bottom: 12px; }
-    .footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; }
-    .footer .hotline { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 12px; }
-    .footer img { width: 160px; height: 160px; object-fit: contain; border-radius: 8px; }
     .src-group { margin-bottom: 14px; }
     .src-plat { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
     .src-items { display: flex; flex-wrap: wrap; gap: 14px; }
@@ -38,39 +35,35 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>收藏提醒设置</h1>
+    <h1 data-i18n="optionsTitle">MarkSync · 设置</h1>
 
-    <h2>检测策略</h2>
+    <h2 data-i18n="optSecInterval">检测策略</h2>
     <div class="row">
       <div>
-        <label>自动检测间隔</label>
+        <label data-i18n="optLabelInterval">自动检测间隔</label>
         <div class="interval">
           <input type="number" id="intervalValue" min="0.5" step="any">
           <select id="intervalUnit">
-            <option value="1">分钟</option>
-            <option value="60">小时</option>
-            <option value="1440">天</option>
+            <option value="1" data-i18n="unitMinute">分钟</option>
+            <option value="60" data-i18n="unitHour">小时</option>
+            <option value="1440" data-i18n="unitDay">天</option>
           </select>
         </div>
       </div>
     </div>
 
-    <h2>爬取的平台与内容</h2>
-    <div class="hint">只检测勾选的；取消勾选的会被跳过。</div>
+    <h2 data-i18n="optSecSources">同步的平台与内容</h2>
+    <div class="hint" data-i18n="optHintSources">只检测勾选的；取消勾选的会被跳过。</div>
     <div id="sources"></div>
 
     <div class="btn-row">
-      <button class="primary" id="btn-save">保存</button>
+      <button class="primary" id="btn-save" data-i18n="btnSave">保存</button>
       <span id="msg"></span>
     </div>
 
-    <h2>数据</h2>
+    <h2 data-i18n="optSecData">数据</h2>
     <div class="btn-row" style="margin-top:0">
-      <button id="btn-clear">清空清单并重新全量导入</button>
-    </div>
-
-    <div class="footer">
-      <img src="../assets/wechat-qr.png" alt="微信二维码">
+      <button id="btn-clear" data-i18n="btnClear">清空清单并重新全量导入</button>
     </div>
   </div>
   <script type="module" src="options.js"></script>

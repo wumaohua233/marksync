@@ -1,0 +1,109 @@
+name: Release
+
+# 推 v* tag 时自动打包并发布。
+#
+# 产物会去两个地方：
+#   1. GitHub Release  —— 归档、留版本历史
+#   2. docs/dl/        —— 跟网站同源，用户下载不用连 GitHub
+#
+# 为什么要镜像一份到 docs/dl/：这套站点部署在 Cloudflare Pages（输出目录 = docs/），
+# 同源下载的意义是——用户的浏览器全程只需要连一个域名。直连 GitHub 不稳的网络下，
+# 用户能打开页面但下不了 zip，是这类项目最常见的失败模式。
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # 必须显式检出 main：tag 触发时默认是游离 HEAD，后面要往分支上提交镜像文件
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      # tag 和 manifest.json 版本号必须一致，否则扩展内更新检查会永远认为"有新版本"
+      - name: Verify tag matches manifest version
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(python3 -c "import json;print(json.load(open('manifest.json'))['version'])")
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::tag v$TAG 与 manifest.json 里的 $VERSION 不一致"
+            echo "先改 manifest.json 的 version，再打对应的 tag。"
+            exit 1
+          fi
+          echo "版本一致：v$VERSION"
+
+      - name: Validate locales
+        run: python3 scripts/check_i18n.py
+
+      - name: Package extension
+        run: |
+          chmod +x scripts/pack.sh
+          ./scripts/pack.sh
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true
+          body: |
+            ## 安装 / Install / インストール
+
+            下载下面的 `marksync-v*.zip`，解压后按网站上的三步操作：
+            https://wumaohua233.github.io/marksync/
+
+            已经装了旧版？把 zip 解压**覆盖到同一个文件夹**即可，
+            Chrome 会自动重新加载扩展，不用回 `chrome://extensions` 点刷新。
+
+            ---
+            下载下方 zip 并解压覆盖原文件夹即可更新。数据都在本地，不会丢。
+
+      # 把 zip 镜像进 docs/dl/ 并提交。Cloudflare Pages / GitHub Pages 都是
+      # 推 main 自动重建，所以这一步提交完，网站上的下载按钮就指向新版本了。
+      - name: Mirror artifact into docs/dl
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          mkdir -p docs/dl
+
+          # 只留最新一个 zip：历史版本在 Release 里，站上堆一堆二进制没意义
+          find docs/dl -name 'marksync-v*.zip' ! -name "marksync-v${VERSION}.zip" -delete
+          cp "dist/marksync-v${VERSION}.zip" docs/dl/
+
+          python3 - "$VERSION" <<'PY'
+          import glob, hashlib, json, os, sys
+          version = sys.argv[1]
+          f = f"docs/dl/marksync-v{version}.zip"
+          data = open(f, "rb").read()
+          json.dump(
+              {
+                  "version": version,
+                  "file": os.path.basename(f),
+                  "size": len(data),
+                  "sha256": hashlib.sha256(data).hexdigest(),
+              },
+              open("docs/dl/latest.json", "w", encoding="utf-8"),
+              ensure_ascii=False,
+              indent=2,
+          )
+          print(f"{f}  {len(data)} bytes")
+          print("sha256", hashlib.sha256(data).hexdigest())
+          PY
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/dl
+          git diff --cached --quiet && echo "无变化，跳过提交" || \
+            git commit -m "release: 镜像 v${VERSION} 到 docs/dl"
+          git push

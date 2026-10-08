@@ -1,0 +1,331 @@
+{
+  "extName": {
+    "message": "MarkSync",
+    "description": "扩展名称"
+  },
+  "extDesc": {
+    "message": "自动同步小红书/抖音/YouTube/X/TikTok/Instagram 的收藏与点赞新增，提醒你还有哪些收藏了没看。"
+  },
+  "plat_xhs": {
+    "message": "小红书"
+  },
+  "plat_douyin": {
+    "message": "抖音"
+  },
+  "plat_youtube": {
+    "message": "YouTube"
+  },
+  "plat_x": {
+    "message": "X"
+  },
+  "plat_tiktok": {
+    "message": "TikTok"
+  },
+  "plat_instagram": {
+    "message": "Instagram"
+  },
+  "src_xhs_fav": {
+    "message": "小红书收藏"
+  },
+  "src_xhs_like": {
+    "message": "小红书点赞"
+  },
+  "src_dy_fav": {
+    "message": "抖音收藏"
+  },
+  "src_dy_like": {
+    "message": "抖音喜欢"
+  },
+  "src_yt_like": {
+    "message": "YouTube 喜欢"
+  },
+  "src_yt_watch": {
+    "message": "YouTube 稍后看"
+  },
+  "src_x_bookmark": {
+    "message": "X 书签"
+  },
+  "src_x_like": {
+    "message": "X 点赞"
+  },
+  "src_tt_fav": {
+    "message": "TikTok 收藏"
+  },
+  "src_tt_like": {
+    "message": "TikTok 点赞"
+  },
+  "src_ig_fav": {
+    "message": "Instagram 收藏"
+  },
+  "src_ig_like": {
+    "message": "Instagram 点赞"
+  },
+  "srcs_xhs_fav": {
+    "message": "收藏",
+    "description": "设置页复选框短标签，平台名由分组标题给出"
+  },
+  "srcs_xhs_like": {
+    "message": "点赞"
+  },
+  "srcs_dy_fav": {
+    "message": "收藏"
+  },
+  "srcs_dy_like": {
+    "message": "喜欢"
+  },
+  "srcs_yt_like": {
+    "message": "喜欢"
+  },
+  "srcs_yt_watch": {
+    "message": "稍后看"
+  },
+  "srcs_x_bookmark": {
+    "message": "书签"
+  },
+  "srcs_x_like": {
+    "message": "点赞"
+  },
+  "srcs_tt_fav": {
+    "message": "收藏"
+  },
+  "srcs_tt_like": {
+    "message": "点赞"
+  },
+  "srcs_ig_fav": {
+    "message": "收藏"
+  },
+  "srcs_ig_like": {
+    "message": "点赞"
+  },
+  "tabRecent": {
+    "message": "最新"
+  },
+  "btnExport": {
+    "message": "导出"
+  },
+  "btnReadAll": {
+    "message": "全部已读"
+  },
+  "btnSync": {
+    "message": "同步"
+  },
+  "btnSettings": {
+    "message": "设置"
+  },
+  "btnRunMoreTitle": {
+    "message": "选择平台单独同步"
+  },
+  "runningTip": {
+    "message": "正在后台检测，请稍候…"
+  },
+  "btnMarkRead": {
+    "message": "已读"
+  },
+  "itemUntitled": {
+    "message": "（无标题）"
+  },
+  "statusNoNetwork": {
+    "message": "网络未就绪"
+  },
+  "statusNoNetworkHint": {
+    "message": "，连上网后会自动同步（每 3 分钟自动重试）"
+  },
+  "statusNeverRun": {
+    "message": "还没有检测过，点击「同步」开始"
+  },
+  "statusLastCheck": {
+    "message": "上次检测 $1"
+  },
+  "statusNextRun": {
+    "message": "，下次 $1"
+  },
+  "statusAllOk": {
+    "message": " · 全部同步正常"
+  },
+  "statusFail": {
+    "message": "$1失败：$2"
+  },
+  "btnGoLogin": {
+    "message": "去登录"
+  },
+  "loginBarTip": {
+    "message": "未登录，登录后才能检测："
+  },
+  "btnLoginWith": {
+    "message": "登录$1"
+  },
+  "emptyList": {
+    "message": "暂无内容。去小红书/抖音收藏点什么，再点「同步」。"
+  },
+  "syncPlatform": {
+    "message": "同步$1"
+  },
+  "lastSyncAt": {
+    "message": "上次同步 $1"
+  },
+  "neverSynced": {
+    "message": "还没同步过"
+  },
+  "nextSyncAt": {
+    "message": "下次同步 $1"
+  },
+  "alertEmptyExport": {
+    "message": "清单是空的，没什么可导出的"
+  },
+  "csvColSource": {
+    "message": "来源"
+  },
+  "csvColTitle": {
+    "message": "标题"
+  },
+  "csvColAuthor": {
+    "message": "作者"
+  },
+  "csvColLink": {
+    "message": "链接"
+  },
+  "csvColStatus": {
+    "message": "状态"
+  },
+  "csvColDiscovered": {
+    "message": "发现时间"
+  },
+  "csvColDesc": {
+    "message": "描述"
+  },
+  "csvStatusNew": {
+    "message": "未读"
+  },
+  "csvStatusRead": {
+    "message": "已读"
+  },
+  "csvFilename": {
+    "message": "marksync_$1.csv"
+  },
+  "optionsTitle": {
+    "message": "MarkSync · 设置"
+  },
+  "optSecInterval": {
+    "message": "检测策略"
+  },
+  "optLabelInterval": {
+    "message": "自动检测间隔"
+  },
+  "unitMinute": {
+    "message": "分钟"
+  },
+  "unitHour": {
+    "message": "小时"
+  },
+  "unitDay": {
+    "message": "天"
+  },
+  "optSecSources": {
+    "message": "同步的平台与内容"
+  },
+  "optHintSources": {
+    "message": "只检测勾选的；取消勾选的会被跳过。"
+  },
+  "btnSave": {
+    "message": "保存"
+  },
+  "optSecData": {
+    "message": "数据"
+  },
+  "btnClear": {
+    "message": "清空清单并重新全量导入"
+  },
+  "msgSaved": {
+    "message": "已保存"
+  },
+  "msgSavedClamped": {
+    "message": "已保存（Chrome 限制最短 0.5 分钟，已自动调整）"
+  },
+  "confirmClear": {
+    "message": "确定清空全部清单与已读记录？下次检测将重新全量导入。"
+  },
+  "msgCleared": {
+    "message": "已清空，点插件图标里的「同步」重新导入"
+  },
+  "notifTitle": {
+    "message": "有 $1 条新收藏/点赞加入 MarkSync"
+  },
+  "notifBody": {
+    "message": "$1，点击查看清单"
+  },
+  "notifMore": {
+    "message": "等"
+  },
+  "notifFallback": {
+    "message": "点击查看清单"
+  },
+  "errXhsNoUid": {
+    "message": "未找到用户主页链接（可能未登录）"
+  },
+  "errXhsUidFail": {
+    "message": "uid 解析失败"
+  },
+  "errNoContent": {
+    "message": "未抓到内容（可能未登录或列表为空）"
+  },
+  "errSsrBroken": {
+    "message": "页面数据结构异常"
+  },
+  "errNoContentOrLogin": {
+    "message": "未抓到内容（可能未登录或接口变更）"
+  },
+  "errMissingUsername": {
+    "message": "拿不到用户名（可能未登录）"
+  },
+  "errXhsSsrNoData": {
+    "message": "页面无 SSR 数据（可能未登录）"
+  },
+  "errYtNoData": {
+    "message": "页面无 ytInitialData（可能未登录）"
+  },
+  "errIgBlocked": {
+    "message": "接口返回 $1"
+  },
+  "errXhsTabMissing": {
+    "message": "找不到该 tab（收藏 tab 未加载或无此内容）"
+  },
+  "errTabTimeout": {
+    "message": "页面加载超时"
+  },
+  "errContentTimeout": {
+    "message": "页面脚本未就绪"
+  },
+  "errWindowFailed": {
+    "message": "无法创建后台窗口"
+  },
+  "errNotLoggedInPlatform": {
+    "message": "$1 未登录"
+  },
+  "errCaptureFailed": {
+    "message": "抓取失败"
+  },
+  "titleDouyinVideo": {
+    "message": "抖音视频"
+  },
+  "titleTikTokVideo": {
+    "message": "TikTok 视频"
+  },
+  "titleIgPost": {
+    "message": "Instagram 帖子"
+  },
+  "titleXTweet": {
+    "message": "X 推文"
+  },
+  "titleXUserTweet": {
+    "message": "$1 的推文"
+  },
+  "updateAvailable": {
+    "message": "有新版本 $1"
+  },
+  "updateNow": {
+    "message": "去更新"
+  },
+  "updateDismiss": {
+    "message": "忽略此版本"
+  }
+}

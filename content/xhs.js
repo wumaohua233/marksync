@@ -1,6 +1,9 @@
 // 小红书 content script：解析 uid、收藏/点赞列表滚动抓取、详情正文提取。
 // 与 background 的消息协议见 background.js（XHS_* 消息）。
 
+const msg = (k, ...a) =>
+  chrome.i18n.getMessage(k, a.length ? a.map(String) : undefined) || k;
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const rand = (min, max) => Math.floor(min + Math.random() * (max - min));
 
@@ -61,9 +64,9 @@ async function collectList() {
 
 function resolveUid() {
   const a = document.querySelector('a[href*="/user/profile/"]');
-  if (!a) return { ok: false, error: "未找到用户主页链接（可能未登录）" };
+  if (!a) return { ok: false, error: msg("errXhsNoUid") };
   const m = (a.getAttribute("href") || "").match(/\/user\/profile\/([a-z0-9]+)/);
-  return m ? { ok: true, uid: m[1] } : { ok: false, error: "uid 解析失败" };
+  return m ? { ok: true, uid: m[1] } : { ok: false, error: msg("errXhsUidFail") };
 }
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {

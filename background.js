@@ -3,6 +3,7 @@
 import * as store from "./lib/store.js";
 import * as xhsSsr from "./lib/xhsSsr.js";
 import * as ytSsr from "./lib/ytSsr.js";
+import { t, UI_LANG } from "./lib/i18n.js";
 
 const ALARM_NAME = "shouchang-check";
 const NET_RETRY_ALARM = "shouchang-netretry"; // 网络没就绪时的重试闹钟
@@ -16,7 +17,7 @@ function waitTabLoaded(tabId, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       chrome.tabs.onUpdated.removeListener(listener);
-      reject(new Error("页面加载超时"));
+      reject(new Error(t("errTabTimeout")));
     }, timeoutMs);
     function listener(id, info) {
       if (id === tabId && info.status === "complete") {
@@ -33,7 +34,7 @@ async function sendWithTimeout(tabId, msg, timeoutMs = 90000) {
   return Promise.race([
     chrome.tabs.sendMessage(tabId, msg),
     sleep(timeoutMs).then(() => {
-      throw new Error("content script 响应超时");
+      throw new Error(t("errContentTimeout"));
     }),
   ]);
 }
@@ -49,7 +50,7 @@ async function waitContentReady(tabId, retries = 20) {
     }
     await sleep(500);
   }
-  throw new Error("content script 未就绪");
+  throw new Error(t("errContentTimeout"));
 }
 
 // 渲染抓取必须用真实的后台标签页：页面不可见时（最小化窗口）
@@ -82,7 +83,7 @@ async function closeTabQuietly(tabId) {
 async function openBackgroundWindow(url) {
   const win = await chrome.windows.create({ url, focused: false, state: "minimized" });
   const tab = win.tabs && win.tabs[0];
-  if (!tab) throw new Error("无法创建后台窗口");
+  if (!tab) throw new Error(t("errWindowFailed"));
   await waitTabLoaded(tab.id);
   await waitContentReady(tab.id);
   return { windowId: win.id, tabId: tab.id };
@@ -118,12 +119,12 @@ async function collectXhsRender(sources) {
   const tabId = await openBackgroundTab("https://www.xiaohongshu.com/");
   try {
     const uidResp = await sendWithTimeout(tabId, { type: "XHS_RESOLVE_UID" }, 10000);
-    if (!uidResp?.ok) throw new Error(uidResp?.error || "小红书未登录");
+    if (!uidResp?.ok) throw new Error(uidResp?.error || t("errNotLoggedInPlatform", store.platformLabel("xhs")));
     for (const source of sources) {
       const tab = source === "xhs_like" ? "liked" : "fav";
       await navigateTab(tabId, XHS_LIST_URL(uidResp.uid, tab));
       const resp = await sendWithTimeout(tabId, { type: "XHS_COLLECT_LIST" }, 120000);
-      if (!resp?.ok) throw new Error(`${source} 抓取失败: ${resp?.error || "未知"}`);
+      if (!resp?.ok) throw new Error(t("statusFail", store.sourceLabel(source), resp?.error || "?"));
       out[source] = resp.items;
     }
   } finally {
@@ -141,8 +142,8 @@ async function collectDouyin(sources) {
     const { windowId, tabId } = await openBackgroundWindow(DY_LIST_URL(showTab));
     try {
       const resp = await sendWithTimeout(tabId, { type: "DY_COLLECT_FIRST", source }, 30000);
-      if (!resp?.ok) throw new Error(resp?.error || "抓取失败");
-      if (resp.items.length === 0) throw new Error("未抓到内容（可能未登录）");
+      if (!resp?.ok) throw new Error(resp?.error || t("errCaptureFailed"));
+      if (resp.items.length === 0) throw new Error(t("errNoContent"));
       console.log(
         `[shouchang] ${source} 采集 ${resp.items.length} 条（${resp.via === "api" ? "接口拦截·无感" : "DOM回退"}）`
       );
@@ -201,7 +202,7 @@ async function collectYtViaWindow(playlistId) {
     state: "minimized",
   });
   const tabId = win.tabs?.[0]?.id;
-  if (!tabId) throw new Error("无法创建后台窗口");
+  if (!tabId) throw new Error(t("errWindowFailed"));
   try {
     await waitTabLoaded(tabId);
     for (let i = 0; i < 20; i++) {
@@ -228,7 +229,7 @@ async function collectYouTube(sources, results) {
     try {
       if (source === "yt_watch") {
         const items = await collectYtViaWindow("WL");
-        if (!items.length) throw new Error("未抓到视频（可能未登录或列表为空）");
+        if (!items.length) throw new Error(t("errNoContent"));
         out[source] = items;
       } else {
         out[source] = await ytSsr.fetchList("LL");
@@ -255,7 +256,7 @@ function xHarvestInPage() {
     const author = userName.split("@")[0].trim();
     map[id] = {
       id,
-      title: text.slice(0, 40) || (author ? author + " 的推文" : "X 推文"),
+      title: text.slice(0, 40) || (author ? t("titleXUserTweet", author) : t("titleXTweet")),
       desc: text.slice(0, 300),
       cover: "",
       url: "https://x.com/i/web/status/" + id,
@@ -268,7 +269,7 @@ function xHarvestInPage() {
 async function collectXViaWindow(url) {
   const win = await chrome.windows.create({ url, focused: false, state: "minimized" });
   const tabId = win.tabs?.[0]?.id;
-  if (!tabId) throw new Error("无法创建后台窗口");
+  if (!tabId) throw new Error(t("errWindowFailed"));
   try {
     await waitTabLoaded(tabId);
     for (let i = 0; i < 24; i++) {
@@ -300,7 +301,7 @@ function xGetUsernameInPage() {
 async function collectXLikes() {
   const win = await chrome.windows.create({ url: "https://x.com/home", focused: false, state: "minimized" });
   const tabId = win.tabs?.[0]?.id;
-  if (!tabId) throw new Error("无法创建后台窗口");
+  if (!tabId) throw new Error(t("errWindowFailed"));
   try {
     await waitTabLoaded(tabId);
     let username = null;
@@ -310,7 +311,7 @@ async function collectXLikes() {
       if (username) break;
       await sleep(500);
     }
-    if (!username) throw new Error("拿不到 X 用户名（可能未登录）");
+    if (!username) throw new Error(t("errMissingUsername"));
     const loaded = waitTabLoaded(tabId);
     await chrome.tabs.update(tabId, { url: `https://x.com/${username}/likes` });
     await loaded;
@@ -335,7 +336,7 @@ async function collectX(sources, results) {
         source === "x_like"
           ? await collectXLikes()
           : await collectXViaWindow("https://x.com/i/bookmarks");
-      if (!items.length) throw new Error("未抓到内容（可能未登录或列表为空）");
+      if (!items.length) throw new Error(t("errNoContent"));
       out[source] = items;
     } catch (e) {
       results[source] = { ok: false, error: e.message };
@@ -368,7 +369,7 @@ function ttReadVideos() {
     const am = href.match(/@([^/]+)/);
     items.push({
       id: m[1],
-      title: desc.slice(0, 40) || "TikTok 视频",
+      title: desc.slice(0, 40) || t("titleTikTokVideo"),
       desc: desc.slice(0, 300),
       cover: (img && img.getAttribute("src")) || "",
       url: href.startsWith("http") ? href : "https://www.tiktok.com" + href,
@@ -382,7 +383,7 @@ function ttReadVideos() {
 async function collectTikTokTab(target) {
   const win = await chrome.windows.create({ url: "https://www.tiktok.com/foryou", focused: false, state: "minimized" });
   const tabId = win.tabs?.[0]?.id;
-  if (!tabId) throw new Error("无法创建后台窗口");
+  if (!tabId) throw new Error(t("errWindowFailed"));
   try {
     await waitTabLoaded(tabId);
     let username = null;
@@ -392,7 +393,7 @@ async function collectTikTokTab(target) {
       if (username) break;
       await sleep(500);
     }
-    if (!username) throw new Error("拿不到 TikTok 用户名（可能未登录）");
+    if (!username) throw new Error(t("errMissingUsername"));
     const loaded = waitTabLoaded(tabId);
     await chrome.tabs.update(tabId, { url: `https://www.tiktok.com/@${username}` });
     await loaded;
@@ -424,7 +425,7 @@ async function collectTikTokTab(target) {
       }
       await sleep(500);
     }
-    if (!clicked) throw new Error("找不到该 tab（收藏 tab 未加载或无此内容）");
+    if (!clicked) throw new Error(t("errXhsTabMissing"));
     for (let i = 0; i < 24; i++) {
       const res = await chrome.scripting.executeScript({ target: { tabId }, func: ttReadVideos });
       const items = res?.[0]?.result;
@@ -444,7 +445,7 @@ async function collectTikTok(sources, results) {
     try {
       const target = source === "tt_fav" ? { text: "Favorites|收藏" } : { e2e: "liked-tab" };
       const items = await collectTikTokTab(target);
-      if (!items.length) throw new Error("未抓到内容（可能未登录或列表为空）");
+      if (!items.length) throw new Error(t("errNoContent"));
       out[source] = items;
     } catch (e) {
       results[source] = { ok: false, error: e.message };
@@ -484,7 +485,7 @@ function igReadPosts() {
     const desc = alt.replace(/^Photo by .+? on [^.]+\.\s*/i, "").trim();
     items.push({
       id: m[2],
-      title: (desc || alt).slice(0, 40) || "Instagram 帖子",
+      title: (desc || alt).slice(0, 40) || t("titleIgPost"),
       desc: alt.slice(0, 300),
       cover: (img && img.getAttribute("src")) || "",
       url: `https://www.instagram.com/${m[1]}/${m[2]}/`,
@@ -500,7 +501,7 @@ async function collectIgSaved() {
   try {
     win = await chrome.windows.create({ url: "https://www.instagram.com/", focused: false, state: "minimized" });
     const tabId = win.tabs?.[0]?.id;
-    if (!tabId) throw new Error("无法创建后台窗口");
+    if (!tabId) throw new Error(t("errWindowFailed"));
     await waitTabLoaded(tabId);
     let username = null;
     for (let i = 0; i < 16; i++) {
@@ -509,7 +510,7 @@ async function collectIgSaved() {
       if (username) break;
       await sleep(500);
     }
-    if (!username) throw new Error("拿不到 Instagram 用户名（可能未登录）");
+    if (!username) throw new Error(t("errMissingUsername"));
     const loaded = waitTabLoaded(tabId);
     await chrome.tabs.update(tabId, { url: `https://www.instagram.com/${username}/saved/all-posts/` });
     await loaded;
@@ -553,7 +554,7 @@ async function collectIgLikes() {
   try {
     win = await chrome.windows.create({ url: "https://www.instagram.com/", focused: false, state: "minimized" });
     const tabId = win.tabs?.[0]?.id;
-    if (!tabId) throw new Error("无法创建后台窗口");
+    if (!tabId) throw new Error(t("errWindowFailed"));
     await waitTabLoaded(tabId);
     const res = await chrome.scripting.executeScript({
       target: { tabId },
@@ -573,7 +574,10 @@ async function collectIgLikes() {
     });
     const out = res?.[0]?.result;
     if (!out || out.status !== 200) {
-      throw new Error("接口返回 " + (out?.status || "?") + "：" + (out?.body || "").replace(/\s+/g, " ").slice(0, 70));
+      throw new Error(
+        t("errIgBlocked", String(out?.status || "?")) +
+          " " + (out?.body || "").replace(/\s+/g, " ").slice(0, 70)
+      );
     }
     const data = JSON.parse(out.body);
     const list = Array.isArray(data.items) ? data.items : [];
@@ -584,7 +588,7 @@ async function collectIgLikes() {
         const cand = m.image_versions2 && m.image_versions2.candidates;
         return {
           id: String(m.pk || m.id || m.code || ""),
-          title: cap.slice(0, 40) || "Instagram 帖子",
+          title: cap.slice(0, 40) || t("titleIgPost"),
           desc: cap.slice(0, 300),
           cover: (cand && cand[0] && cand[0].url) || "",
           url: m.code ? `https://www.instagram.com/p/${m.code}/` : "https://www.instagram.com/",
@@ -604,7 +608,7 @@ async function collectInstagram(sources, results) {
   for (const source of sources) {
     try {
       const items = source === "ig_like" ? await collectIgLikes() : await collectIgSaved();
-      if (!items.length) throw new Error("未抓到内容（可能未登录或列表为空）");
+      if (!items.length) throw new Error(t("errNoContent"));
       out[source] = items;
     } catch (e) {
       results[source] = { ok: false, error: e.message };
@@ -668,12 +672,16 @@ async function refreshBadge() {
 }
 
 function notifyNew(count, firstTitles) {
-  const preview = firstTitles.slice(0, 2).join("、");
+  const SEP = /^(zh|ja)/i.test(UI_LANG) ? "、" : ", ";
+  const preview = firstTitles.slice(0, 2).join(SEP);
+  // 「等」在 JS 里拼好，再整体作为单个 $1 传入——两个 $n 相邻（$1$2）会被 Chrome
+  // 当成名为 "1" 的具名占位符，导致整个扩展加载失败。详见 scripts/check_i18n.py。
+  const summary = preview + (count > 2 ? t("notifMore") : "");
   chrome.notifications.create({
     type: "basic",
     iconUrl: "icons/128.png",
-    title: `有 ${count} 条新收藏/点赞加入「待会再看」`,
-    message: preview ? `${preview}${count > 2 ? " 等" : ""}，点击查看清单` : "点击查看清单",
+    title: t("notifTitle", String(count)),
+    message: summary ? t("notifBody", summary) : t("notifFallback"),
     priority: 1,
   });
 }

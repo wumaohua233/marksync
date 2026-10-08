@@ -1,0 +1,106 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # 110 个 key × 3 种语言，漏一个就是线上显示成裸 key，必须挡在合并前
+      - name: Validate locales
+        run: python3 scripts/check_i18n.py
+
+      - name: Validate JSON
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, glob, sys
+          bad = False
+          for f in ["manifest.json"] + glob.glob("_locales/*/messages.json"):
+              try:
+                  json.load(open(f, encoding="utf-8"))
+                  print(f"  ok  {f}")
+              except Exception as e:
+                  print(f"  FAIL {f}: {e}"); bad = True
+          sys.exit(1 if bad else 0)
+          PY
+
+      - name: Validate JS syntax
+        run: |
+          set -euo pipefail
+          fail=0
+          while IFS= read -r f; do
+            cp "$f" "/tmp/$(echo "$f" | tr '/' '_').mjs"
+            if ! node --check "/tmp/$(echo "$f" | tr '/' '_').mjs"; then
+              echo "::error file=$f::语法错误"; fail=1
+            fi
+          done < <(find . -name '*.js' -not -path './.git/*' -not -path './docs/*')
+          exit $fail
+
+      # 最强的一道防线：让 Chrome 自己加载一遍。能抓住 JSON 校验根本看不见的问题——
+      # 例如 messages.json 里写了 $1$2（两个 $ 之间只有 ASCII，被当成未声明的具名占位符），
+      # 会让**整个扩展加载失败**，而文件本身完全合法。
+      # ubuntu runner 自带 google-chrome；找不到就跳过，不让 CI 假红。
+      - name: Verify Chrome can load the extension
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)
+          for p in /opt/google/chrome/chrome /usr/bin/google-chrome /snap/bin/chromium; do
+            [ -z "$CHROME" ] && [ -x "$p" ] && CHROME="$p"
+          done
+          if [ -z "$CHROME" ]; then
+            echo "::warning::runner 上没有 Chrome，跳过扩展加载校验"
+            exit 0
+          fi
+          echo "使用 $CHROME ($($CHROME --version))"
+          fail=0
+          # --pack-extension 只校验 default_locale 那一份，所以要逐个语言都试
+          for loc in zh_CN en ja; do
+            d=$(mktemp -d)
+            cp -R manifest.json background.js lib content popup options icons _locales LICENSE "$d/"
+            # 必须写成单行：run: | 块标量里任何顶格的内容都会截断 YAML 块（踩过）
+            python3 -c "import json; p='$d/manifest.json'; m=json.load(open(p,encoding='utf-8')); m['default_locale']='$loc'; json.dump(m,open(p,'w',encoding='utf-8'),ensure_ascii=False,indent=2)"
+            out=$("$CHROME" --pack-extension="$d" 2>&1 | grep -i ERROR || true)
+            if [ -n "$out" ]; then
+              echo "::error::default_locale=$loc 时 Chrome 拒绝加载: $out"
+              fail=1
+            else
+              echo "  ok  default_locale=$loc"
+            fi
+            rm -f "${d}.crx" "${d}.pem"; rm -rf "$d"
+          done
+          exit $fail
+
+      # manifest 里声明但仓库里不存在的路径，装了扩展才会发现，这里提前挡掉
+      - name: Verify manifest files exist
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, sys
+          m = json.load(open("manifest.json", encoding="utf-8"))
+          paths = []
+          paths += list((m.get("icons") or {}).values())
+          paths += list((m.get("action", {}).get("default_icon") or {}).values())
+          if m.get("action", {}).get("default_popup"): paths.append(m["action"]["default_popup"])
+          if m.get("options_ui", {}).get("page"): paths.append(m["options_ui"]["page"])
+          if m.get("background", {}).get("service_worker"): paths.append(m["background"]["service_worker"])
+          for cs in m.get("content_scripts", []): paths += cs.get("js", []) + cs.get("css", [])
+          missing = [p for p in paths if not os.path.exists(p)]
+          for p in sorted(set(paths)): print(("  ok  " if os.path.exists(p) else "  MISSING ") + p)
+          if missing:
+              print(f"::error::manifest 引用了不存在的文件: {missing}"); sys.exit(1)
+          PY

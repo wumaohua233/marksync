@@ -1,0 +1,18 @@
+# Cloudflare Pages 专用配置（GitHub Pages 会忽略这个文件）。
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+
+# 发版归档的 zip 内容永不变，可以长期缓存
+/dl/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# latest.json 每次发版都变，必须每次校验
+/dl/latest.json
+  Cache-Control: public, max-age=0, must-revalidate
+
+# 页面本身要能及时拿到新版本
+/
+  Cache-Control: public, max-age=0, must-revalidate

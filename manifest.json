@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "待会再看",
+  "default_locale": "zh_CN",
+  "name": "__MSG_extName__",
   "version": "0.1.0",
-  "description": "自动同步小红书/抖音/YouTube/X/TikTok/Instagram 的收藏与点赞新增，提醒你还有哪些收藏了没看。",
+  "description": "__MSG_extDesc__",
   "icons": {
     "16": "icons/16.png",
     "48": "icons/48.png",
@@ -15,7 +16,7 @@
       "48": "icons/48.png",
       "128": "icons/128.png"
     },
-    "default_title": "待会再看"
+    "default_title": "__MSG_extName__"
   },
   "background": {
     "service_worker": "background.js",
@@ -32,7 +33,8 @@
     "https://www.youtube.com/*",
     "https://x.com/*",
     "https://www.tiktok.com/*",
-    "https://www.instagram.com/*"
+    "https://www.instagram.com/*",
+    "https://api.github.com/*"
   ],
   "content_scripts": [
     {

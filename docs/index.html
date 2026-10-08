@@ -3,35 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>待会再看 — 小红书/抖音/YouTube/X/TikTok/Instagram 收藏点赞同步</title>
+<title>MarkSync — 收藏点赞同步</title>
+<meta name="description" content="自动同步小红书/抖音/YouTube/X/TikTok/Instagram 的收藏与点赞新增。纯本地、开源、不上传任何数据。">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root { --red: #FF2442; --ink: #1a1a1a; --gray: #6b6b6b; --line: #eee; }
-  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--ink); line-height: 1.6; background: #fff; }
+  body { font-family: -apple-system, "PingFang SC", "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif; color: var(--ink); line-height: 1.6; background: #fff; }
   .wrap { max-width: 760px; margin: 0 auto; padding: 0 22px; }
   a { color: inherit; }
 
-  /* Hero */
-  .hero { background: linear-gradient(160deg, #FFF1EC 0%, #FFE0D6 100%); padding: 64px 0 56px; text-align: center; }
+  .hero { background: linear-gradient(160deg, #FFF1EC 0%, #FFE0D6 100%); padding: 56px 0 52px; text-align: center; position: relative; }
   .logo { font-size: 46px; }
   h1 { font-size: 40px; font-weight: 800; margin: 12px 0 10px; letter-spacing: 1px; }
-  .sub { font-size: 17px; color: var(--gray); max-width: 520px; margin: 0 auto 6px; }
+  .sub { font-size: 17px; color: var(--gray); max-width: 540px; margin: 0 auto 6px; }
   .sub em { font-style: normal; color: var(--red); font-weight: 600; }
   .dl { display: inline-flex; align-items: center; gap: 8px; margin-top: 26px; background: var(--red); color: #fff; font-size: 17px; font-weight: 600; padding: 14px 30px; border-radius: 12px; text-decoration: none; box-shadow: 0 12px 28px -8px rgba(255,36,66,.5); transition: transform .12s; }
   .dl:hover { transform: translateY(-2px); }
+  .dl[aria-disabled="true"] { opacity: .6; pointer-events: none; }
   .dl-note { display: block; margin-top: 12px; font-size: 13px; color: #a98; }
-
-  /* platforms */
   .plats { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 30px; }
   .plat { background: rgba(255,255,255,.75); border: 1px solid #fff; border-radius: 999px; padding: 6px 15px; font-size: 13px; font-weight: 500; color: #5a3e38; }
 
-  /* sections */
+  .langs { position: absolute; top: 16px; right: 18px; display: flex; gap: 4px; }
+  .langs button { border: 1px solid rgba(255,255,255,.9); background: rgba(255,255,255,.6); color: #8a6f66; font-size: 12px; padding: 3px 10px; border-radius: 999px; cursor: pointer; font-family: inherit; }
+  .langs button:hover { background: #fff; }
+  .langs button.on { background: #fff; color: var(--red); font-weight: 600; }
+
   section { padding: 50px 0; border-bottom: 1px solid var(--line); }
   h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
   h2 .n { color: var(--red); }
   .lead { color: var(--gray); margin-bottom: 26px; }
 
-  /* steps */
   .step { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px dashed #eee; }
   .step:last-child { border-bottom: none; }
   .step .idx { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--red); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; }
@@ -40,60 +42,310 @@
   .step .d { color: var(--gray); font-size: 14px; margin-top: 2px; }
   code { background: #f4f4f5; border-radius: 5px; padding: 1px 7px; font-family: "SF Mono", Menlo, monospace; font-size: 13px; color: #d4380d; }
 
-  /* features */
+  pre { background: #1f1f22; color: #e6e6e6; border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin: 10px 0 0; }
+  pre code { background: none; color: inherit; padding: 0; font-size: 12.5px; line-height: 1.7; }
+  pre .c { color: #7d8590; }
+
   .feat { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .feat .f { background: #fafafa; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
   .feat .f .ft { font-weight: 600; margin-bottom: 3px; }
   .feat .f .fd { font-size: 13px; color: var(--gray); }
 
   .callout { background: #FFF7E6; border: 1px solid #FFE1B3; border-radius: 12px; padding: 16px 18px; font-size: 14px; color: #96622a; margin-top: 24px; }
+  .privacy { background: #F0F9F4; border: 1px solid #C6E9D4; border-radius: 12px; padding: 18px 20px; font-size: 14px; color: #2a6b47; margin-top: 22px; }
+  .privacy .pt { font-weight: 700; margin-bottom: 6px; }
+  .ver { font-size: 13px; color: var(--gray); margin-top: 10px; }
+  .ver a { color: var(--red); text-decoration: none; }
 
   footer { text-align: center; padding: 36px 0 46px; color: #aaa; font-size: 13px; }
   footer a { color: var(--red); text-decoration: none; }
 
-  @media (max-width: 560px) { h1 { font-size: 32px; } .feat { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { h1 { font-size: 32px; } .feat { grid-template-columns: 1fr; } .langs { position: static; justify-content: center; margin-bottom: 18px; } }
 </style>
 </head>
 <body>
   <div class="hero">
     <div class="wrap">
+      <div class="langs" id="langs"></div>
       <div class="logo">📌</div>
-      <h1>待会再看</h1>
-      <p class="sub">自动同步你在各平台的<em>收藏与点赞</em>，攒成一份「待会再看」清单 —— 专治"刷到就收藏，收藏就吃灰"。</p>
-      <a class="dl" href="https://github.com/wumaohua233/daihuizaikan/archive/refs/heads/main.zip">⬇ 下载插件（ZIP）</a>
-      <span class="dl-note">免费开源 · 纯本地 · 不上传任何数据</span>
-      <div class="plats">
-        <span class="plat">小红书</span><span class="plat">抖音</span><span class="plat">YouTube</span>
-        <span class="plat">X</span><span class="plat">TikTok</span><span class="plat">Instagram</span>
-      </div>
+      <h1 data-i18n="name">MarkSync</h1>
+      <p class="sub" data-i18n-html="tagline">自动同步你在各平台的<em>收藏与点赞</em>，攒成一份待看清单 —— 专治"刷到就收藏，收藏就吃灰"。</p>
+      <a class="dl" id="dl" href="https://github.com/wumaohua233/marksync/releases/latest">⬇ <span data-i18n="dl">下载插件</span></a>
+      <span class="dl-note" data-i18n="dlNote">免费开源 · 纯本地 · 不上传任何数据</span>
+      <div class="plats" id="plats"></div>
     </div>
   </div>
 
   <div class="wrap">
     <section>
-      <h2><span class="n">3 步</span>安装</h2>
-      <p class="lead">Chrome 非商店扩展需要「开发者模式」加载，一次装好，之后自动用。</p>
-      <div class="step"><div class="idx">1</div><div class="body"><div class="t">下载并解压</div><div class="d">点上面的「下载插件」，把下载到的 zip 解压，得到一个文件夹。</div></div></div>
-      <div class="step"><div class="idx">2</div><div class="body"><div class="t">打开扩展页，开「开发者模式」</div><div class="d">Chrome 地址栏输入 <code>chrome://extensions</code> 回车，打开右上角的「开发者模式」开关。</div></div></div>
-      <div class="step"><div class="idx">3</div><div class="body"><div class="t">加载已解压的扩展程序</div><div class="d">点「加载已解压的扩展程序」，选中第 1 步解压出的文件夹 —— 装好了。</div></div></div>
-      <div class="step"><div class="idx">✓</div><div class="body"><div class="t">开始用</div><div class="d">在浏览器登录你要追的平台网页版，点插件图标 →「同步」。</div></div></div>
-      <div class="callout">💡 每次重启 Chrome 可能提示「要停用开发者模式扩展吗」，点<b>保留/取消</b>别停用即可。这是 Chrome 对非商店扩展的常规提醒。</div>
+      <h2><span class="n" data-i18n="installN">3 步</span> <span data-i18n="installTitle">安装</span></h2>
+      <p class="lead" data-i18n="installLead">Chrome 非商店扩展需要「开发者模式」加载，一次装好，之后自动用。</p>
+      <div class="step"><div class="idx">1</div><div class="body"><div class="t" data-i18n="s1t">下载并解压</div><div class="d" data-i18n="s1d">点上面的按钮下载 zip，解压得到一个 marksync 文件夹。</div></div></div>
+      <div class="step"><div class="idx">2</div><div class="body"><div class="t" data-i18n="s2t">打开扩展页，开「开发者模式」</div><div class="d" data-i18n-html="s2d">Chrome 地址栏输入 <code>chrome://extensions</code> 回车，打开右上角的「开发者模式」开关。</div></div></div>
+      <div class="step"><div class="idx">3</div><div class="body"><div class="t" data-i18n="s3t">加载已解压的扩展程序</div><div class="d" data-i18n="s3d">点「加载已解压的扩展程序」，选中第 1 步解压出的那个文件夹 —— 装好了。</div></div></div>
+      <div class="step"><div class="idx">✓</div><div class="body"><div class="t" data-i18n="s4t">开始用</div><div class="d" data-i18n="s4d">在浏览器登录你要追的平台网页版，点插件图标 →「同步」。</div></div></div>
+      <div class="callout" data-i18n="callout">💡 每次重启 Chrome 可能提示「要停用开发者模式扩展吗」，点「保留」别停用即可。这是 Chrome 对非商店扩展的常规提醒，不是出错。</div>
     </section>
 
     <section>
-      <h2>它能做什么</h2>
-      <p class="lead">6 个平台的收藏/点赞，后台悄悄同步，攒成一份待看清单。</p>
+      <h2 data-i18n="upTitle">装了旧版怎么更新</h2>
+      <p class="lead" data-i18n="upLead">扩展会自己检查新版本，有新版本时弹出提示。更新有两条路：</p>
+      <div class="step"><div class="idx">A</div><div class="body">
+        <div class="t" data-i18n="upCmdT">命令行（最省事，推荐）</div>
+        <div class="d" data-i18n="upCmdD">装的时候用 git clone，以后一条命令更新，Chrome 会自动重新加载。</div>
+<pre><code><span class="c"># <span data-i18n="upCmdInstall">首次安装</span></span>
+git clone https://github.com/wumaohua233/marksync.git ~/marksync
+
+<span class="c"># <span data-i18n="upCmdUpdate">以后更新</span></span>
+cd ~/marksync &amp;&amp; git pull</code></pre>
+      </div></div>
+      <div class="step"><div class="idx">B</div><div class="body">
+        <div class="t" data-i18n="upManT">手动覆盖</div>
+        <div class="d" data-i18n="upManD">下载新 zip，解压后覆盖到原来那个文件夹。Chrome 会监视文件变化并自动重载，不用回扩展页点刷新。</div>
+      </div></div>
+      <div class="callout" data-i18n="upNote">🔒 更新不会动你的数据 —— 清单和已读记录都存在浏览器里，和扩展文件夹无关。</div>
+    </section>
+
+    <section>
+      <h2 data-i18n="featTitle">它能做什么</h2>
+      <p class="lead" data-i18n="featLead">6 个平台的收藏/点赞，后台悄悄同步，攒成一份待看清单。</p>
       <div class="feat">
-        <div class="f"><div class="ft">🔔 后台自动同步</div><div class="fd">定时检查各平台新收藏，角标 + 通知提醒，不用你手动翻。</div></div>
-        <div class="f"><div class="ft">🎯 按平台单独同步</div><div class="fd">同步按钮带下拉，可只同步某个平台，并显示各自上次同步时间。</div></div>
-        <div class="f"><div class="ft">📤 一键导出 CSV</div><div class="fd">整个清单导成表格，Excel 直接打开，来源/标题/链接一应俱全。</div></div>
-        <div class="f"><div class="ft">🔒 纯本地不上传</div><div class="fd">所有数据只存你自己浏览器，抓的是你自己账号的收藏，不经服务器。</div></div>
+        <div class="f"><div class="ft" data-i18n="f1t">🔔 后台自动同步</div><div class="fd" data-i18n="f1d">定时检查各平台新收藏，角标 + 通知提醒，不用你手动翻。</div></div>
+        <div class="f"><div class="ft" data-i18n="f2t">🎯 按平台单独同步</div><div class="fd" data-i18n="f2d">同步按钮带下拉，可只同步某个平台，并显示各自上次同步时间。</div></div>
+        <div class="f"><div class="ft" data-i18n="f3t">📤 一键导出 CSV</div><div class="fd" data-i18n="f3d">整个清单导成表格，Excel 直接打开，来源/标题/链接一应俱全。</div></div>
+        <div class="f"><div class="ft" data-i18n="f4t">🌏 中/英/日 三语</div><div class="fd" data-i18n="f4d">界面跟随浏览器语言自动切换。</div></div>
       </div>
+    </section>
+
+    <section>
+      <h2 data-i18n="privTitle">数据与隐私</h2>
+      <p class="lead" data-i18n="privLead">所有数据只存在你自己的浏览器里。没有服务器，没有账号，没有任何上报。</p>
+      <div class="privacy">
+        <div class="pt" data-i18n="privVerifyT">🔍 不用信我，你可以自己核验</div>
+        <div data-i18n="privVerifyD">代码全在 GitHub 上。全仓库搜索 fetch( ，除了 6 个平台和一个用于探测网络的百度 favicon，没有任何指向第三方的请求；数据存在 chrome.storage.local。有疑惑可以直接在仓库里提 issue。</div>
+      </div>
+      <p class="ver" id="ver"></p>
     </section>
   </div>
 
   <footer>
-    开源于 <a href="https://github.com/wumaohua233/daihuizaikan">GitHub</a> · GPL-3.0 · 个人玩具项目，仅供学习交流
+    <a href="https://github.com/wumaohua233/marksync">GitHub</a> · GPL-3.0 ·
+    <span data-i18n="footer">个人玩具项目，仅供学习交流</span>
   </footer>
+
+<script>
+const REPO = "wumaohua233/marksync";
+const API  = "https://api.github.com/repos/" + REPO + "/releases/latest";
+
+const I18N = {
+  zh_CN: {
+    title: "MarkSync — 收藏点赞同步",
+    name: "MarkSync",
+    tagline: '自动同步你在各平台的<em>收藏与点赞</em>，攒成一份待看清单 —— 专治"刷到就收藏，收藏就吃灰"。',
+    dl: "下载插件", dlNote: "免费开源 · 纯本地 · 不上传任何数据",
+    installN: "3 步", installTitle: "安装",
+    installLead: "Chrome 非商店扩展需要「开发者模式」加载，一次装好，之后自动用。",
+    s1t: "下载并解压", s1d: "点上面的按钮下载 zip，解压得到一个 marksync 文件夹。",
+    s2t: "打开扩展页，开「开发者模式」", s2d: 'Chrome 地址栏输入 <code>chrome://extensions</code> 回车，打开右上角的「开发者模式」开关。',
+    s3t: "加载已解压的扩展程序", s3d: "点「加载已解压的扩展程序」，选中第 1 步解压出的那个文件夹 —— 装好了。",
+    s4t: "开始用", s4d: "在浏览器登录你要追的平台网页版，点插件图标 →「同步」。",
+    callout: "💡 每次重启 Chrome 可能提示「要停用开发者模式扩展吗」，点「保留」别停用即可。这是 Chrome 对非商店扩展的常规提醒，不是出错。",
+    upTitle: "装了旧版怎么更新",
+    upLead: "扩展会自己检查新版本，有新版本时弹出提示。更新有两条路：",
+    upCmdT: "命令行（最省事，推荐）",
+    upCmdD: "装的时候用 git clone，以后一条命令更新，Chrome 会自动重新加载。",
+    upCmdInstall: "首次安装", upCmdUpdate: "以后更新",
+    upManT: "手动覆盖",
+    upManD: "下载新 zip，解压后覆盖到原来那个文件夹。Chrome 会监视文件变化并自动重载，不用回扩展页点刷新。",
+    upNote: "🔒 更新不会动你的数据 —— 清单和已读记录都存在浏览器里，和扩展文件夹无关。",
+    featTitle: "它能做什么",
+    featLead: "6 个平台的收藏/点赞，后台悄悄同步，攒成一份待看清单。",
+    f1t: "🔔 后台自动同步", f1d: "定时检查各平台新收藏，角标 + 通知提醒，不用你手动翻。",
+    f2t: "🎯 按平台单独同步", f2d: "同步按钮带下拉，可只同步某个平台，并显示各自上次同步时间。",
+    f3t: "📤 一键导出 CSV", f3d: "整个清单导成表格，Excel 直接打开，来源/标题/链接一应俱全。",
+    f4t: "🌏 中/英/日 三语", f4d: "界面跟随浏览器语言自动切换。",
+    privTitle: "数据与隐私",
+    privLead: "所有数据只存在你自己的浏览器里。没有服务器，没有账号，没有任何上报。",
+    privVerifyT: "🔍 不用信我，你可以自己核验",
+    privVerifyD: "代码全在 GitHub 上。全仓库搜索 fetch( ，除了 6 个平台和一个用于探测网络的百度 favicon，没有任何指向第三方的请求；数据存在 chrome.storage.local。有疑惑可以直接在仓库里提 issue。",
+    footer: "个人玩具项目，仅供学习交流",
+    latest: (v) => `<a href="https://github.com/${REPO}/releases/tag/v${v}" target="_blank" rel="noopener">最新版本 v${v}</a> · <a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener">更新日志</a>`,
+    noRelease: (u) => `<a href="${u}" target="_blank" rel="noopener">在 GitHub 上查看最新版本</a>`,
+  },
+  en: {
+    title: "MarkSync — saved & liked, all in one list",
+    name: "MarkSync",
+    tagline: 'Syncs new <em>saves and likes</em> from every platform into one list — so the things you saved for later actually get looked at.',
+    dl: "Download", dlNote: "Free & open source · Fully local · Nothing is uploaded",
+    installN: "3 steps", installTitle: "to install",
+    installLead: "Extensions outside the Chrome Web Store load in Developer mode. Set it up once, then forget about it.",
+    s1t: "Download and unzip", s1d: "Hit the button above, then unzip. You'll get a folder called marksync.",
+    s2t: "Open the extensions page and enable Developer mode", s2d: 'Go to <code>chrome://extensions</code> and flip the "Developer mode" switch in the top-right corner.',
+    s3t: "Load the unpacked extension", s3d: 'Click "Load unpacked" and pick the folder you unzipped in step 1. Done.',
+    s4t: "Start using it", s4d: "Log in to whichever platforms you use in your browser, then click the icon and hit Sync.",
+    callout: '💡 Chrome may ask "Disable developer mode extensions?" on restart. Click Keep — this is a routine prompt for non-store extensions, not an error.',
+    upTitle: "Updating from an older version",
+    upLead: "The extension checks for new releases itself and shows a banner when one is out. Two ways to update:",
+    upCmdT: "Command line (easiest)",
+    upCmdD: "Install with git clone, then a single command keeps you current. Chrome reloads it automatically.",
+    upCmdInstall: "Install", upCmdUpdate: "Update later",
+    upManT: "Manual overwrite",
+    upManD: "Download the new zip and unzip it over the same folder. Chrome watches for file changes and reloads the extension for you — no need to go back to the extensions page.",
+    upNote: "🔒 Updating won't touch your data — the list and read history live in the browser, not in the extension folder.",
+    featTitle: "What it does",
+    featLead: "Saves and likes from six platforms, quietly synced into one list.",
+    f1t: "🔔 Syncs in the background", f1d: "Checks for new saves on a schedule and pings you with a badge and a notification.",
+    f2t: "🎯 Sync one platform at a time", f2d: "The Sync button has a dropdown — sync a single platform and see when each was last synced.",
+    f3t: "📤 Export to CSV", f3d: "Dump the whole list to a spreadsheet, ready for Excel, with source, title and link.",
+    f4t: "🌏 English / 中文 / 日本語", f4d: "The UI follows your browser language.",
+    privTitle: "Data & privacy",
+    privLead: "Everything stays in your own browser. No server, no account, no telemetry.",
+    privVerifyT: "🔍 Don't take my word for it — check",
+    privVerifyD: "The whole thing is on GitHub. Search the repo for fetch( — apart from the six platforms and one Baidu favicon used to probe connectivity, nothing points anywhere else. Data lives in chrome.storage.local. Open an issue if anything looks off.",
+    footer: "A personal toy project, shared for learning",
+    latest: (v) => `<a href="https://github.com/${REPO}/releases/tag/v${v}" target="_blank" rel="noopener">Latest v${v}</a> · <a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener">changelog</a>`,
+    noRelease: (u) => `<a href="${u}" target="_blank" rel="noopener">See the latest release on GitHub</a>`,
+  },
+  ja: {
+    title: "MarkSync — 保存といいねをひとつのリストに",
+    name: "MarkSync",
+    tagline: "各プラットフォームの<em>保存といいね</em>を自動で同期して、ひとつのリストに。あとで見るつもりが溜まったまま、を解消します。",
+    dl: "ダウンロード", dlNote: "無料・オープンソース · 完全ローカル · 送信なし",
+    installN: "3 ステップ", installTitle: "でインストール",
+    installLead: "Chrome ウェブストア以外の拡張機能は「デベロッパーモード」で読み込みます。一度設定すれば、あとは自動です。",
+    s1t: "ダウンロードして解凍", s1d: "上のボタンで zip をダウンロードし、解凍します。marksync というフォルダが出てきます。",
+    s2t: "拡張機能ページを開き、デベロッパーモードをオン", s2d: 'アドレスバーに <code>chrome://extensions</code> と入力して開き、右上の「デベロッパーモード」をオンにします。',
+    s3t: "パッケージ化されていない拡張機能を読み込む", s3d: "「パッケージ化されていない拡張機能を読み込む」をクリックし、手順 1 で解凍したフォルダを選びます。完了です。",
+    s4t: "使ってみる", s4d: "ブラウザで各プラットフォームにログインし、拡張機能のアイコンをクリックして「同期」を押します。",
+    callout: "💡 Chrome の再起動時に「デベロッパーモードの拡張機能を無効にしますか？」と聞かれることがあります。「保持」を選べば大丈夫です。ストア外の拡張機能に対する通常の確認で、エラーではありません。",
+    upTitle: "旧バージョンからの更新",
+    upLead: "拡張機能が自分で新バージョンを確認し、あれば通知します。更新方法は 2 通り：",
+    upCmdT: "コマンドライン（いちばん簡単）",
+    upCmdD: "git clone でインストールしておけば、コマンド 1 つで更新できます。Chrome が自動で再読み込みします。",
+    upCmdInstall: "初回インストール", upCmdUpdate: "以降の更新",
+    upManT: "手動で上書き",
+    upManD: "新しい zip をダウンロードし、同じフォルダに上書き解凍します。Chrome はファイルの変更を監視して自動で再読み込みするので、拡張機能ページに戻る必要はありません。",
+    upNote: "🔒 更新してもデータは消えません。リストと既読履歴はブラウザ側に保存されており、拡張機能のフォルダとは無関係です。",
+    featTitle: "できること",
+    featLead: "6 つのプラットフォームの保存といいねを、裏で静かに同期してひとつのリストに。",
+    f1t: "🔔 バックグラウンドで自動同期", f1d: "定期的に新着を確認し、バッジと通知で知らせます。手動で探す必要はありません。",
+    f2t: "🎯 プラットフォーム単位で同期", f2d: "同期ボタンのドロップダウンから 1 つだけ同期できます。それぞれの前回同期時刻も表示します。",
+    f3t: "📤 CSV エクスポート", f3d: "リスト全体を表形式で書き出します。Excel でそのまま開け、ソース・タイトル・リンクが入っています。",
+    f4t: "🌏 日本語 / English / 中文", f4d: "UI はブラウザの言語に合わせて自動で切り替わります。",
+    privTitle: "データとプライバシー",
+    privLead: "データはすべてあなたのブラウザの中だけにあります。サーバーもアカウントも、送信もありません。",
+    privVerifyT: "🔍 信用しなくて大丈夫、自分で確認できます",
+    privVerifyD: "コードはすべて GitHub にあります。リポジトリ全体で fetch( を検索してみてください。6 つのプラットフォームと、接続確認に使う 1 つの Baidu favicon 以外に、外部へのリクエストはありません。データは chrome.storage.local に保存されます。気になる点は Issue でどうぞ。",
+    footer: "個人の趣味プロジェクトです",
+    latest: (v) => `<a href="https://github.com/${REPO}/releases/tag/v${v}" target="_blank" rel="noopener">最新版 v${v}</a> · <a href="https://github.com/${REPO}/releases" target="_blank" rel="noopener">変更履歴</a>`,
+    noRelease: (u) => `<a href="${u}" target="_blank" rel="noopener">GitHub で最新リリースを見る</a>`,
+  },
+};
+
+const PLATFORMS = {
+  zh_CN: ["小红书", "抖音", "YouTube", "X", "TikTok", "Instagram"],
+  en: ["Xiaohongshu", "Douyin", "YouTube", "X", "TikTok", "Instagram"],
+  ja: ["小紅書", "抖音", "YouTube", "X", "TikTok", "Instagram"],
+};
+const LANG_NAMES = { zh_CN: "中文", en: "EN", ja: "日本語" };
+
+const saved = localStorage.getItem("marksync-lang");
+const fromUrl = new URLSearchParams(location.search).get("lang");
+const browser = (navigator.language || "en").toLowerCase();
+const guess = browser.startsWith("zh") ? "zh_CN" : browser.startsWith("ja") ? "ja" : "en";
+let lang = [saved, fromUrl].find((v) => v && I18N[v]) || guess;
+
+function apply(next) {
+  lang = next;
+  localStorage.setItem("marksync-lang", lang);
+  const d = I18N[lang];
+  document.documentElement.lang = lang.replace("_", "-");
+  document.title = d.title;
+
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const v = d[el.dataset.i18n];
+    if (v != null) el.textContent = v;
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+    const v = d[el.dataset.i18nHtml];
+    if (v != null) el.innerHTML = v;
+  });
+
+  document.getElementById("plats").innerHTML = PLATFORMS[lang]
+    .map((p) => `<span class="plat">${p}</span>`)
+    .join("");
+
+  document.getElementById("langs").innerHTML = Object.keys(I18N)
+    .map((k) => `<button data-lang="${k}" class="${k === lang ? "on" : ""}">${LANG_NAMES[k]}</button>`)
+    .join("");
+  document.querySelectorAll("#langs button").forEach((b) => {
+    b.addEventListener("click", () => apply(b.dataset.lang));
+  });
+
+  renderDl();
+  renderVersion(); // 语言变了，下载按钮和版本号两处文案都要跟着换
+}
+
+let release = null;
+
+// 下载按钮上的版本号：拿到了就显示，没拿到就只显示「下载」，不显示假版本号
+function renderDl() {
+  const dl = document.getElementById("dl");
+  if (release?.zip) dl.href = release.zip;
+  const v = release?.version ? " v" + release.version : "";
+  dl.innerHTML = `⬇ <span>${I18N[lang].dl}${v}</span>`;
+}
+
+function renderVersion() {
+  const el = document.getElementById("ver");
+  const d = I18N[lang];
+  if (!release) return;
+  el.innerHTML = release.version ? d.latest(release.version) : d.noRelease(release.url);
+}
+
+// 版本和下载链接的取值顺序：
+//   ① dl/latest.json —— 同源，zip 就在本站 dl/ 下。发版时由 GitHub Action 镜像过来。
+//      同源意味着用户的浏览器不需要连 GitHub 就能下载，慢网络/直连不通时照样能用。
+//   ② GitHub Releases API —— dl/ 还没生成时兜底。
+//   ③ Releases 页面 —— 全都失败（离线 / 限流 / 还没发过版）时的兑底，点击仍然能用。
+async function loadRelease() {
+  const fallback = `https://github.com/${REPO}/releases/latest`;
+
+  // ① 同源镜像
+  try {
+    const r = await fetch("dl/latest.json", { cache: "no-store" });
+    if (r.ok) {
+      const j = await r.json();
+      if (j && j.version && j.file) {
+        const href = "dl/" + j.file;
+        release = { version: String(j.version), zip: href, url: href };
+        renderDl();
+        renderVersion();
+        return;
+      }
+    }
+  } catch (_) {
+    /* 没有 dl/ 目录，往下走 */
+  }
+
+  // ② GitHub Releases API
+  try {
+    const r = await fetch(API, { headers: { Accept: "application/vnd.github+json" } });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    const version = String(j.tag_name || "").replace(/^v/i, "");
+    const asset = (j.assets || []).find((a) => a.name.endsWith(".zip"));
+    release = { version, url: j.html_url || fallback, zip: asset ? asset.browser_download_url : null };
+  } catch (_) {
+    // ③ 全挂
+    release = { version: null, url: fallback, zip: null };
+  }
+  renderDl();
+  renderVersion();
+}
+
+apply(lang);
+loadRelease();
+</script>
 </body>
 </html>

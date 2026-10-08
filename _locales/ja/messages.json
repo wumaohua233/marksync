@@ -1,0 +1,331 @@
+{
+  "extName": {
+    "message": "MarkSync",
+    "description": "拡張機能の名前"
+  },
+  "extDesc": {
+    "message": "小紅書・抖音・YouTube・X・TikTok・Instagram の保存といいねの新着を自動で同期し、あとで見るつもりが溜まったままになっているものを知らせます。"
+  },
+  "plat_xhs": {
+    "message": "小紅書"
+  },
+  "plat_douyin": {
+    "message": "抖音"
+  },
+  "plat_youtube": {
+    "message": "YouTube"
+  },
+  "plat_x": {
+    "message": "X"
+  },
+  "plat_tiktok": {
+    "message": "TikTok"
+  },
+  "plat_instagram": {
+    "message": "Instagram"
+  },
+  "src_xhs_fav": {
+    "message": "小紅書 保存済み"
+  },
+  "src_xhs_like": {
+    "message": "小紅書 いいね"
+  },
+  "src_dy_fav": {
+    "message": "抖音 保存済み"
+  },
+  "src_dy_like": {
+    "message": "抖音 いいね"
+  },
+  "src_yt_like": {
+    "message": "YouTube 高評価"
+  },
+  "src_yt_watch": {
+    "message": "YouTube 後で見る"
+  },
+  "src_x_bookmark": {
+    "message": "X ブックマーク"
+  },
+  "src_x_like": {
+    "message": "X いいね"
+  },
+  "src_tt_fav": {
+    "message": "TikTok お気に入り"
+  },
+  "src_tt_like": {
+    "message": "TikTok いいね"
+  },
+  "src_ig_fav": {
+    "message": "Instagram 保存済み"
+  },
+  "src_ig_like": {
+    "message": "Instagram いいね"
+  },
+  "srcs_xhs_fav": {
+    "message": "保存済み",
+    "description": "設定画面のチェックボックスの短いラベル。プラットフォーム名は見出し側に出ます"
+  },
+  "srcs_xhs_like": {
+    "message": "いいね"
+  },
+  "srcs_dy_fav": {
+    "message": "保存済み"
+  },
+  "srcs_dy_like": {
+    "message": "いいね"
+  },
+  "srcs_yt_like": {
+    "message": "高評価"
+  },
+  "srcs_yt_watch": {
+    "message": "後で見る"
+  },
+  "srcs_x_bookmark": {
+    "message": "ブックマーク"
+  },
+  "srcs_x_like": {
+    "message": "いいね"
+  },
+  "srcs_tt_fav": {
+    "message": "お気に入り"
+  },
+  "srcs_tt_like": {
+    "message": "いいね"
+  },
+  "srcs_ig_fav": {
+    "message": "保存済み"
+  },
+  "srcs_ig_like": {
+    "message": "いいね"
+  },
+  "tabRecent": {
+    "message": "最新"
+  },
+  "btnExport": {
+    "message": "エクスポート"
+  },
+  "btnReadAll": {
+    "message": "すべて既読"
+  },
+  "btnSync": {
+    "message": "同期"
+  },
+  "btnSettings": {
+    "message": "設定"
+  },
+  "btnRunMoreTitle": {
+    "message": "プラットフォームを指定して同期"
+  },
+  "runningTip": {
+    "message": "バックグラウンドで確認しています…"
+  },
+  "btnMarkRead": {
+    "message": "既読"
+  },
+  "itemUntitled": {
+    "message": "（タイトルなし）"
+  },
+  "statusNoNetwork": {
+    "message": "ネットワーク未接続"
+  },
+  "statusNoNetworkHint": {
+    "message": " — 接続すると自動で同期します（3 分ごとに再試行）"
+  },
+  "statusNeverRun": {
+    "message": "まだ確認していません。「同期」を押して開始してください。"
+  },
+  "statusLastCheck": {
+    "message": "前回の確認 $1"
+  },
+  "statusNextRun": {
+    "message": "、次回 $1"
+  },
+  "statusAllOk": {
+    "message": " · すべて正常"
+  },
+  "statusFail": {
+    "message": "$1 が失敗：$2"
+  },
+  "btnGoLogin": {
+    "message": "ログイン"
+  },
+  "loginBarTip": {
+    "message": "未ログインです。ログインしないと確認できません："
+  },
+  "btnLoginWith": {
+    "message": "$1 にログイン"
+  },
+  "emptyList": {
+    "message": "まだ何もありません。小紅書や抖音で何か保存してから「同期」を押してください。"
+  },
+  "syncPlatform": {
+    "message": "$1 を同期"
+  },
+  "lastSyncAt": {
+    "message": "前回の同期 $1"
+  },
+  "neverSynced": {
+    "message": "まだ同期していません"
+  },
+  "nextSyncAt": {
+    "message": "次回の同期 $1"
+  },
+  "alertEmptyExport": {
+    "message": "リストが空です。エクスポートするものがありません。"
+  },
+  "csvColSource": {
+    "message": "ソース"
+  },
+  "csvColTitle": {
+    "message": "タイトル"
+  },
+  "csvColAuthor": {
+    "message": "投稿者"
+  },
+  "csvColLink": {
+    "message": "リンク"
+  },
+  "csvColStatus": {
+    "message": "状態"
+  },
+  "csvColDiscovered": {
+    "message": "検出日時"
+  },
+  "csvColDesc": {
+    "message": "説明"
+  },
+  "csvStatusNew": {
+    "message": "未読"
+  },
+  "csvStatusRead": {
+    "message": "既読"
+  },
+  "csvFilename": {
+    "message": "marksync_$1.csv"
+  },
+  "optionsTitle": {
+    "message": "MarkSync · 設定"
+  },
+  "optSecInterval": {
+    "message": "確認の設定"
+  },
+  "optLabelInterval": {
+    "message": "自動確認の間隔"
+  },
+  "unitMinute": {
+    "message": "分"
+  },
+  "unitHour": {
+    "message": "時間"
+  },
+  "unitDay": {
+    "message": "日"
+  },
+  "optSecSources": {
+    "message": "同期するプラットフォームと内容"
+  },
+  "optHintSources": {
+    "message": "チェックしたものだけ確認します。外したものはスキップされます。"
+  },
+  "btnSave": {
+    "message": "保存"
+  },
+  "optSecData": {
+    "message": "データ"
+  },
+  "btnClear": {
+    "message": "リストを消して全件を再取り込み"
+  },
+  "msgSaved": {
+    "message": "保存しました"
+  },
+  "msgSavedClamped": {
+    "message": "保存しました（Chrome の最小値が 0.5 分のため自動調整しました）"
+  },
+  "confirmClear": {
+    "message": "リストと既読履歴をすべて消しますか？次回の確認で全件を再取り込みします。"
+  },
+  "msgCleared": {
+    "message": "消去しました。ポップアップの「同期」で再取り込みしてください。"
+  },
+  "notifTitle": {
+    "message": "MarkSync に新着 $1 件"
+  },
+  "notifBody": {
+    "message": "$1。クリックでリストを表示"
+  },
+  "notifMore": {
+    "message": " ほか"
+  },
+  "notifFallback": {
+    "message": "クリックでリストを表示"
+  },
+  "errXhsNoUid": {
+    "message": "プロフィールへのリンクが見つかりません（未ログインの可能性）"
+  },
+  "errXhsUidFail": {
+    "message": "uid を解析できませんでした"
+  },
+  "errNoContent": {
+    "message": "取得できませんでした（未ログインか、リストが空の可能性）"
+  },
+  "errSsrBroken": {
+    "message": "ページデータの構造が想定と異なります"
+  },
+  "errNoContentOrLogin": {
+    "message": "取得できませんでした（未ログインか、仕様変更の可能性）"
+  },
+  "errMissingUsername": {
+    "message": "ユーザー名を取得できません（未ログインの可能性）"
+  },
+  "errXhsSsrNoData": {
+    "message": "ページに SSR データがありません（未ログインの可能性）"
+  },
+  "errYtNoData": {
+    "message": "ページに ytInitialData がありません（未ログインの可能性）"
+  },
+  "errIgBlocked": {
+    "message": "エンドポイントが $1 を返しました"
+  },
+  "errXhsTabMissing": {
+    "message": "タブが見つかりません（保存タブが未読み込みか、中身がありません）"
+  },
+  "errTabTimeout": {
+    "message": "ページの読み込みがタイムアウトしました"
+  },
+  "errContentTimeout": {
+    "message": "ページのスクリプトが準備できていません"
+  },
+  "errWindowFailed": {
+    "message": "バックグラウンドウィンドウを作成できません"
+  },
+  "errNotLoggedInPlatform": {
+    "message": "$1 にログインしていません"
+  },
+  "errCaptureFailed": {
+    "message": "取得に失敗しました"
+  },
+  "titleDouyinVideo": {
+    "message": "抖音の動画"
+  },
+  "titleTikTokVideo": {
+    "message": "TikTok の動画"
+  },
+  "titleIgPost": {
+    "message": "Instagram の投稿"
+  },
+  "titleXTweet": {
+    "message": "X の投稿"
+  },
+  "titleXUserTweet": {
+    "message": "$1 の投稿"
+  },
+  "updateAvailable": {
+    "message": "バージョン $1 が利用可能です"
+  },
+  "updateNow": {
+    "message": "更新する"
+  },
+  "updateDismiss": {
+    "message": "このバージョンをスキップ"
+  }
+}

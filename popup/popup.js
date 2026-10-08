@@ -1,24 +1,24 @@
-// popup：待会再看清单展示与操作。
+// popup：MarkSync 清单展示与操作。
 
 import * as store from "../lib/store.js";
+import { t, applyI18n, fmtSmart, fmtDate, fmtTime, fmtDateTime } from "../lib/i18n.js";
+import { checkUpdate, dismissUpdate, updateUrl } from "../lib/update.js";
+
+applyI18n(); // 先把 HTML 上 data-i18n 的静态文案翻掉
 
 const $ = (id) => document.getElementById(id);
 
 const WEEK_MS = 7 * 24 * 3600 * 1000;
-const TABS = [
-  { key: "recent", label: "最新" },
-  { key: "x_bookmark", label: "X 书签" },
-  { key: "x_like", label: "X 点赞" },
-  { key: "tt_like", label: "TikTok 点赞" },
-  { key: "tt_fav", label: "TikTok 收藏" },
-  { key: "ig_fav", label: "Instagram 收藏" },
-  { key: "ig_like", label: "Instagram 点赞" },
-  { key: "yt_like", label: "YouTube 喜欢" },
-  { key: "yt_watch", label: "YouTube 稍后看" },
-  { key: "dy_like", label: "抖音喜欢" },
-  { key: "dy_fav", label: "抖音收藏" },
-  { key: "xhs_like", label: "小红书喜欢" },
-  { key: "xhs_fav", label: "小红书收藏" },
+// 只存 key，文案渲染时现取。TABS 先前的 {key,label} 结构把中文写死在模块顶层，
+// 换语言时拿到的还是旧值。
+const TAB_KEYS = [
+  "recent",
+  "x_bookmark", "x_like",
+  "tt_like", "tt_fav",
+  "ig_fav", "ig_like",
+  "yt_like", "yt_watch",
+  "dy_like", "dy_fav",
+  "xhs_like", "xhs_fav",
 ];
 let activeTab = "recent";
 
@@ -39,11 +39,12 @@ function renderTabs(items) {
     if (it.firstSeenAt >= cutoff) counts.recent++;
     counts[it.source] = (counts[it.source] || 0) + 1;
   }
-  $("tabs").innerHTML = TABS.map((t) => {
-    const n = counts[t.key] || 0;
+  $("tabs").innerHTML = TAB_KEYS.map((key) => {
+    const n = counts[key] || 0;
+    const label = key === "recent" ? t("tabRecent") : store.sourceLabel(key);
     return (
-      `<button class="tab ${t.key === activeTab ? "active" : ""}" data-tab="${t.key}">` +
-      `${t.label}${n > 0 ? `<span class="cnt">${n}</span>` : ""}</button>`
+      `<button class="tab ${key === activeTab ? "active" : ""}" data-tab="${key}">` +
+      `${escapeHtml(label)}${n > 0 ? `<span class="cnt">${n}</span>` : ""}</button>`
     );
   }).join("");
   $("tabs").querySelectorAll(".tab").forEach((el) => {
@@ -54,37 +55,38 @@ function renderTabs(items) {
   });
 }
 
-function fmtTime(ts) {
-  const d = new Date(ts);
-  const today = new Date();
-  const sameDay = d.toDateString() === today.toDateString();
-  const hm = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-  return sameDay ? hm : `${d.getMonth() + 1}/${d.getDate()} ${hm}`;
+// 时间要塞进文案中间且带样式，整体转义会连标签一起转掉。
+// 用控制字符做哨兵：先按普通文案转义，再把哨兵换成 HTML 片段。
+const MARK = "\u0001";
+function tTime(key, ts) {
+  return escapeHtml(t(key, MARK)).replace(MARK, fmtTimeHtml(ts));
 }
 
 function renderStatus(status) {
   const el = $("status");
   if (status.netPending) {
-    el.innerHTML = `<span class="err">网络未就绪</span>，连上网后会自动同步（每 3 分钟自动重试）`;
+    el.innerHTML = `<span class="err">${escapeHtml(t("statusNoNetwork"))}</span>${escapeHtml(t("statusNoNetworkHint"))}`;
     return;
   }
   if (!status.lastRun) {
-    el.textContent = "还没有检测过，点击「同步」开始";
+    el.textContent = t("statusNeverRun");
     return;
   }
   const r = status.lastRun;
   const errs = [];
   for (const [source, res] of Object.entries(r.results || {})) {
     if (res.ok) continue;
-    const label = store.SOURCES[source]?.label || source;
+    const label = store.sourceLabel(source);
     const loginUrl = LOGIN_URLS[source];
-    const btn = loginUrl ? ` <button class="login-inline" data-url="${loginUrl}">去登录</button>` : "";
-    errs.push(`<span class="err">${label}失败：${res.error}</span>${btn}`);
+    const btn = loginUrl
+      ? ` <button class="login-inline" data-url="${loginUrl}">${escapeHtml(t("btnGoLogin"))}</button>`
+      : "";
+    errs.push(`<span class="err">${escapeHtml(t("statusFail", label, res.error))}</span>${btn}`);
   }
-  const nextStr = status.nextRun ? `，下次 ${fmtTime(status.nextRun)}` : "";
+  const nextStr = status.nextRun ? escapeHtml(t("statusNextRun", fmtSmart(status.nextRun))) : "";
   const errStr = errs.length ? ` · ${errs.join(" · ")}` : "";
-  const okStr = errs.length ? "" : " · 全部同步正常";
-  el.innerHTML = `上次检测 ${fmtTime(r.at)}${nextStr}${errStr || okStr}`;
+  const okStr = errs.length ? "" : escapeHtml(t("statusAllOk"));
+  el.innerHTML = escapeHtml(t("statusLastCheck", fmtSmart(r.at))) + nextStr + (errStr || okStr);
 
   el.querySelectorAll(".login-inline").forEach((btn) => {
     btn.addEventListener("click", (e) => {
@@ -95,12 +97,12 @@ function renderStatus(status) {
 }
 
 const LOGIN_TARGETS = {
-  xhs: { label: "小红书", url: "https://www.xiaohongshu.com" },
-  douyin: { label: "抖音", url: "https://www.douyin.com" },
-  youtube: { label: "YouTube", url: "https://www.youtube.com" },
-  x: { label: "X", url: "https://x.com" },
-  tiktok: { label: "TikTok", url: "https://www.tiktok.com" },
-  instagram: { label: "Instagram", url: "https://www.instagram.com" },
+  xhs: { url: "https://www.xiaohongshu.com" },
+  douyin: { url: "https://www.douyin.com" },
+  youtube: { url: "https://www.youtube.com" },
+  x: { url: "https://x.com" },
+  tiktok: { url: "https://www.tiktok.com" },
+  instagram: { url: "https://www.instagram.com" },
 };
 
 // 检测失败且错误指向登录/未抓取时，状态栏里直接给出「去登录」按钮。
@@ -139,11 +141,13 @@ function renderLoginBar(loginStatus) {
   }
   bar.style.display = "flex";
   bar.innerHTML =
-    `<span class="tip">未登录，登录后才能检测：</span>` +
+    `<span class="tip">${escapeHtml(t("loginBarTip"))}</span>` +
     need
       .map(
         (k) =>
-          `<button class="login-btn" data-platform="${k}" data-url="${LOGIN_TARGETS[k].url}">登录${LOGIN_TARGETS[k].label}</button>`
+          `<button class="login-btn" data-platform="${k}" data-url="${LOGIN_TARGETS[k].url}">${escapeHtml(
+            t("btnLoginWith", store.platformLabel(k))
+          )}</button>`
       )
       .join("");
   bar.querySelectorAll(".login-btn").forEach((btn) => {
@@ -164,20 +168,22 @@ function render(items, unread, nextRun) {
     return b.firstSeenAt - a.firstSeenAt || (a.seq ?? 0) - (b.seq ?? 0);
   });
   if (!arr.length) {
-    list.innerHTML = '<div class="empty">暂无内容。<br>去小红书/抖音收藏点什么，再点「同步」。</div>';
+    list.innerHTML = `<div class="empty">${escapeHtml(t("emptyList"))}</div>`;
     return;
   }
 
+  const nextSuffix = nextRun
+    ? ` <span class="gl-time">· ${tTime("nextSyncAt", nextRun)}</span>`
+    : "";
   let html = "";
   // 单独平台 tab：顶部显示该平台各自的上次同步时间
-  if (activeTab !== "recent") {
-    if (nextRun) html += `<div class="group-label"><span class="gl-time">下次同步 ${fmtTimeHtml(nextRun)}</span></div>`;
+  if (activeTab !== "recent" && nextRun) {
+    html += `<div class="group-label"><span class="gl-time">${tTime("nextSyncAt", nextRun)}</span></div>`;
   }
   let lastSource = null;
   for (const it of arr.slice(0, 100)) {
     if (activeTab === "recent" && it.source !== lastSource) {
-      const timeStr = nextRun ? ` <span class="gl-time">· 下次同步 ${fmtTimeHtml(nextRun)}</span>` : "";
-      html += `<div class="group-label">${store.SOURCES[it.source]?.label || it.source}${timeStr}</div>`;
+      html += `<div class="group-label">${escapeHtml(store.sourceLabel(it.source))}${nextSuffix}</div>`;
       lastSource = it.source;
     }
     const metaHtml = it.author ? `<div class="meta">${escapeHtml(it.author)}</div>` : "";
@@ -185,10 +191,10 @@ function render(items, unread, nextRun) {
       <div class="item ${it.status === "new" ? "" : "read"}" data-key="${it.key}" data-url="${escapeHtml(it.url)}">
         ${it.cover ? `<img src="${escapeHtml(it.cover)}">` : ""}
         <div class="body">
-          <div class="t">${it.status === "new" ? '<span class="dot"></span>' : ""}${escapeHtml(it.title || "（无标题）")}</div>
+          <div class="t">${it.status === "new" ? '<span class="dot"></span>' : ""}${escapeHtml(it.title || t("itemUntitled"))}</div>
           ${metaHtml}
         </div>
-        ${it.status === "new" ? `<button class="mark-read" data-key="${it.key}">已读</button>` : ""}
+        ${it.status === "new" ? `<button class="mark-read" data-key="${it.key}">${escapeHtml(t("btnMarkRead"))}</button>` : ""}
       </div>`;
   }
   list.innerHTML = html;
@@ -243,8 +249,6 @@ async function refresh() {
   return status.running;
 }
 
-const PLATFORM_LABELS = { xhs: "小红书", douyin: "抖音", youtube: "YouTube", x: "X", tiktok: "TikTok", instagram: "Instagram" };
-
 // platform 为空 = 全量同步；传平台名 = 只同步该平台
 async function startSync(platform) {
   $("sync-menu").hidden = true;
@@ -259,19 +263,13 @@ $("btn-run").addEventListener("click", () => startSync());
 
 // 下拉箭头里按平台去重生成「同步 X」选项，点了只同步那个平台
 function renderSyncMenu() {
-  const seen = new Set();
-  const plats = [];
-  for (const meta of Object.values(store.SOURCES)) {
-    if (!seen.has(meta.platform)) {
-      seen.add(meta.platform);
-      plats.push(meta.platform);
-    }
-  }
   const menu = $("sync-menu");
-  menu.innerHTML = plats
+  menu.innerHTML = store.platforms()
     .map(
       (p) =>
-        `<button data-platform="${p}"><span class="p-name">同步${PLATFORM_LABELS[p] || p}</span><span class="p-time" data-time-for="${p}">上次同步: --</span></button>`
+        `<button data-platform="${p}"><span class="p-name">${escapeHtml(
+          t("syncPlatform", store.platformLabel(p))
+        )}</span><span class="p-time" data-time-for="${p}"></span></button>`
     )
     .join("");
   menu.querySelectorAll("button").forEach((b) => {
@@ -283,19 +281,20 @@ function renderSyncMenu() {
 }
 renderSyncMenu();
 
-// 菜单里每个平台的"上次同步"小时间（MM.DD.HH:mm）
-// 时间显示：日期和时间分色，如「7月12日 6:56」
+// 菜单里每个平台的“上次同步”小时间。日期和时间分色，Intl 已按语言给出正确写法，
+// 这里只负责上色（中/日 → 7月12日，英 → Jul 12）。
 function fmtTimeHtml(ts) {
-  const d = new Date(ts);
-  const date = `${d.getMonth() + 1}月${d.getDate()}日`;
-  const time = `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
-  return `<span class="t-date">${date}</span> <span class="t-time">${time}</span>`;
+  return `<span class="t-date">${escapeHtml(fmtDate(ts))}</span> <span class="t-time">${escapeHtml(fmtTime(ts))}</span>`;
 }
 
 function updateSyncTimes(platformSync) {
   document.querySelectorAll("[data-time-for]").forEach((el) => {
     const ts = platformSync && platformSync[el.dataset.timeFor];
-    el.innerHTML = ts ? "上次同步 " + fmtTimeHtml(ts) : "还没同步过";
+    if (!ts) {
+      el.textContent = t("neverSynced");
+      return;
+    }
+    el.innerHTML = escapeHtml(t("lastSyncAt", MARK)).replace(MARK, fmtTimeHtml(ts));
   });
 }
 
@@ -327,18 +326,21 @@ async function exportCsv() {
     (a, b) => b.firstSeenAt - a.firstSeenAt || (a.seq ?? 0) - (b.seq ?? 0)
   );
   if (!arr.length) {
-    alert("清单是空的，没什么可导出的");
+    alert(t("alertEmptyExport"));
     return;
   }
-  const rows = [["来源", "标题", "作者", "链接", "状态", "发现时间", "描述"]];
+  const rows = [[
+    t("csvColSource"), t("csvColTitle"), t("csvColAuthor"), t("csvColLink"),
+    t("csvColStatus"), t("csvColDiscovered"), t("csvColDesc"),
+  ]];
   for (const it of arr) {
     rows.push([
-      store.SOURCES[it.source]?.label || it.source,
+      store.sourceLabel(it.source),
       it.title || "",
       it.author || "",
       it.url || "",
-      it.status === "new" ? "未读" : "已读",
-      fmtTime(it.firstSeenAt),
+      it.status === "new" ? t("csvStatusNew") : t("csvStatusRead"),
+      fmtSmart(it.firstSeenAt),
       it.desc || "",
     ]);
   }
@@ -349,7 +351,7 @@ async function exportCsv() {
   const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
   const a = document.createElement("a");
   a.href = url;
-  a.download = `待会再看_${stamp}.csv`;
+  a.download = t("csvFilename", stamp);
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -358,7 +360,32 @@ async function exportCsv() {
 
 $("btn-export").addEventListener("click", exportCsv);
 
+// 新版本提示。拉不到（离线 / GitHub 限流）就静静地不显示，不打扰用户。
+async function renderUpdateBar() {
+  let info;
+  try {
+    info = await checkUpdate();
+  } catch (_) {
+    return;
+  }
+  const bar = $("update-bar");
+  if (!info?.hasUpdate) {
+    bar.hidden = true;
+    return;
+  }
+  $("update-text").textContent = t("updateAvailable", "v" + info.latest);
+  $("update-go").textContent = t("updateNow");
+  $("update-dismiss").title = t("updateDismiss");
+  bar.hidden = false;
+  $("update-go").onclick = () => chrome.tabs.create({ url: updateUrl(info) });
+  $("update-dismiss").onclick = async () => {
+    await dismissUpdate(info.latest);
+    bar.hidden = true;
+  };
+}
+
 let wasRunning = false;
+renderUpdateBar();
 refresh().then((running) => { wasRunning = running; });
 
 // 轮询：同步中刷新列表显示进度；同步完成后只刷状态栏，避免反复重绘列表导致图片闪烁

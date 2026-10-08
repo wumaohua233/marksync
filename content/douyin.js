@@ -3,6 +3,9 @@
 // 结构化列表（含 aweme_id、desc、封面、收藏时间），无需滚动、无需解析 DOM。
 // 回退：接口没截到时（未登录/接口改名等），退回 DOM 首屏抓取，保证不比旧版差。
 
+const msg = (k, ...a) =>
+  chrome.i18n.getMessage(k, a.length ? a.map(String) : undefined) || k;
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // —— 接口拦截缓存：由 dyHook.js 经 postMessage 送来（仅存内存、不外发）——
@@ -15,7 +18,7 @@ window.addEventListener("message", (e) => {
   const slot = d.kind === "dy_like" ? "dy_like" : "dy_fav";
   captured[slot] = d.items.map((it) => ({
     id: it.id,
-    title: (it.desc || "").slice(0, 30) || "抖音视频",
+    title: (it.desc || "").slice(0, 30) || msg("titleDouyinVideo"),
     desc: (it.desc || "").slice(0, 300),
     cover: it.cover || "",
     url: "https://www.douyin.com/video/" + it.id,
@@ -41,7 +44,7 @@ function harvestDom() {
     const img = a.querySelector("img");
     map.set(id, {
       id,
-      title: desc.slice(0, 30) || "抖音视频",
+      title: desc.slice(0, 30) || msg("titleDouyinVideo"),
       desc: desc.slice(0, 300),
       cover: img?.src || "",
       url: "https://www.douyin.com/video/" + id,
@@ -65,7 +68,7 @@ async function collectFirst(source) {
     await sleep(500);
   }
   if (captured[slot]?.length) return { ok: true, items: captured[slot], via: "api" };
-  return { ok: false, error: "未抓到内容（可能未登录或接口变更）" };
+  return { ok: false, error: msg("errNoContentOrLogin") };
 }
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
