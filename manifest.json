@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "default_locale": "zh_CN",
   "name": "__MSG_extName__",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "__MSG_extDesc__",
   "icons": {
     "16": "icons/16.png",
@@ -26,7 +26,15 @@
     "page": "options/options.html",
     "open_in_tab": true
   },
-  "permissions": ["tabs", "storage", "notifications", "alarms", "scripting", "cookies", "declarativeNetRequest"],
+  "permissions": [
+    "tabs",
+    "storage",
+    "notifications",
+    "alarms",
+    "scripting",
+    "cookies",
+    "declarativeNetRequest"
+  ],
   "host_permissions": [
     "https://www.xiaohongshu.com/*",
     "https://www.douyin.com/*",
@@ -38,19 +46,31 @@
   ],
   "content_scripts": [
     {
-      "matches": ["https://www.xiaohongshu.com/*"],
-      "js": ["content/xhs.js"],
+      "matches": [
+        "https://www.xiaohongshu.com/*"
+      ],
+      "js": [
+        "content/xhs.js"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://www.douyin.com/*"],
-      "js": ["content/dyHook.js"],
+      "matches": [
+        "https://www.douyin.com/*"
+      ],
+      "js": [
+        "content/dyHook.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://www.douyin.com/*"],
-      "js": ["content/douyin.js"],
+      "matches": [
+        "https://www.douyin.com/*"
+      ],
+      "js": [
+        "content/douyin.js"
+      ],
       "run_at": "document_idle"
     }
   ]
