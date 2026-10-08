@@ -304,7 +304,7 @@ function renderVersion() {
 }
 
 // 版本和下载链接的取值顺序：
-//   ① dl/latest.json —— 同源，zip 就在本站 dl/ 下。发版时由 GitHub Action 镜像过来。
+//   ① version.json —— 同源，zip 就在本站 dl/ 下。发版时由 GitHub Action 镜像过来。
 //      同源意味着用户的浏览器不需要连 GitHub 就能下载，慢网络/直连不通时照样能用。
 //   ② GitHub Releases API —— dl/ 还没生成时兜底。
 //   ③ Releases 页面 —— 全都失败（离线 / 限流 / 还没发过版）时的兑底，点击仍然能用。
@@ -313,7 +313,7 @@ async function loadRelease() {
 
   // ① 同源镜像
   try {
-    const r = await fetch("dl/latest.json", { cache: "no-store" });
+    const r = await fetch("version.json", { cache: "no-store" });
     if (r.ok) {
       const j = await r.json();
       if (j && j.version && j.file) {
@@ -325,7 +325,7 @@ async function loadRelease() {
       }
     }
   } catch (_) {
-    /* 没有 dl/ 目录，往下走 */
+    /* 没有 version.json，往下走 */
   }
 
   // ② GitHub Releases API

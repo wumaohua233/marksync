@@ -108,13 +108,16 @@ Cloudflare Pages 会读 `docs/_headers`（缓存与安全头），且把 `docs/`
 1. 校验 tag 与 `manifest.json` 的 `version` 一致
 2. 跑语言包校验，打包出 `dist/marksync-vX.Y.Z.zip`
 3. 建 GitHub Release（归档、留版本历史）
-4. **同时把 zip 镜像到 `docs/dl/` 并提交**，并生成 `docs/dl/latest.json`（版本号 + 大小 + sha256）
+4. **把 zip 镜像到 `docs/dl/`，并写 `docs/version.json`（版本号 + 大小 + sha256）**，然后提交
 
-第 4 步是关键：网站的下载按钮优先读**同源**的 `dl/latest.json`，
-读不到才回退到 GitHub API，再回退到 Releases 页面。
-两个平台都是推 `main` 就自动重建，所以镜像一提交，站上就是新版本了。
+第 4 步是关键：网站的下载按钮和**扩展的更新检查**都优先读同源文件，
+读不到才回退到 GitHub。两个平台都是推 `main` 就自动重建，所以镜像一提交，站上就是新版本了。
 
 > `docs/dl/` 里只保留最新一个 zip，历史版本在 Release 里。
+>
+> `version.json` 刻意放在根目录而不是 `docs/dl/`：Cloudflare Pages 的 `_headers` 对
+> 重叠规则是**拼接**而非覆盖，`/dl/*` 的 long-cache 会把清单一起带上，
+> 导致扩展永远读到旧版本。详见 `docs/_headers` 里的注释。
 
 ### 文字工作流
 
@@ -139,7 +142,8 @@ Cloudflare Pages 会读 `docs/_headers`（缓存与安全头），且把 `docs/`
 所有数据(收藏列表、已读状态、设置)只保存在本地 `chrome.storage`,**不上传、不共享**。
 
 不放心可以自己核验:全仓库搜索 `fetch(`,除了 6 个平台和一处用于探测网络连通性的百度 favicon,没有任何指向第三方的请求。
-(唯一的例外是版本检查——它会读 `api.github.com` 上本仓库的 Release 信息,只读取公开的版本号,不发送任何本地数据。不需要可以在 `manifest.json` 里去掉这条 host 权限。)
+(唯一的例外是版本检查——它读 `getmarksync.pages.dev/version.json`，只拿一个公开的版本号，
+不发送任何本地数据。全部外部请求就是这 7 个域名，`manifest.json` 里一目了然。)
 
 扩展只访问上表所列平台的域名,抓取的是**你自己账号**的收藏 / 点赞。
 

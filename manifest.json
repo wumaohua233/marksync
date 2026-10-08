@@ -34,7 +34,7 @@
     "https://x.com/*",
     "https://www.tiktok.com/*",
     "https://www.instagram.com/*",
-    "https://api.github.com/*"
+    "https://getmarksync.pages.dev/*"
   ],
   "content_scripts": [
     {

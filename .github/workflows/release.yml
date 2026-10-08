@@ -69,9 +69,13 @@ jobs:
             ---
             下载下方 zip 并解压覆盖原文件夹即可更新。数据都在本地，不会丢。
 
-      # 把 zip 镜像进 docs/dl/ 并提交。Cloudflare Pages / GitHub Pages 都是
-      # 推 main 自动重建，所以这一步提交完，网站上的下载按钮就指向新版本了。
-      - name: Mirror artifact into docs/dl
+      # 把 zip 镜像进 docs/dl/、版本清单写到 docs/version.json 并提交。
+      # 两个托管平台都是推 main 自动重建，所以这一步提交完，站上就是新版本了。
+      #
+      # version.json 刻意放在根目录而不是 docs/dl/：Cloudflare Pages 的 _headers
+      # 对重叠规则是**拼接**而非覆盖，/dl/* 的 long-cache 会把清单一起带上，
+      # 导致扩展永远读到旧版本。详见 docs/_headers。
+      - name: Mirror artifact into docs
         run: |
           set -euo pipefail
           VERSION="${GITHUB_REF_NAME#v}"
@@ -82,7 +86,7 @@ jobs:
           cp "dist/marksync-v${VERSION}.zip" docs/dl/
 
           python3 - "$VERSION" <<'PY'
-          import glob, hashlib, json, os, sys
+          import hashlib, json, os, sys
           version = sys.argv[1]
           f = f"docs/dl/marksync-v{version}.zip"
           data = open(f, "rb").read()
@@ -93,7 +97,7 @@ jobs:
                   "size": len(data),
                   "sha256": hashlib.sha256(data).hexdigest(),
               },
-              open("docs/dl/latest.json", "w", encoding="utf-8"),
+              open("docs/version.json", "w", encoding="utf-8"),
               ensure_ascii=False,
               indent=2,
           )
@@ -103,7 +107,7 @@ jobs:
 
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/dl
+          git add docs/dl docs/version.json
           git diff --cached --quiet && echo "无变化，跳过提交" || \
-            git commit -m "release: 镜像 v${VERSION} 到 docs/dl"
+            git commit -m "release: 镜像 v${VERSION} 到 docs/"
           git push
