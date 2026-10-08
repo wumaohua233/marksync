@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>404 — MarkSync</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif;
+         background: linear-gradient(160deg, #FFF1EC 0%, #FFE0D6 100%); color: #1a1a1a; min-height: 100vh;
+         display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .box { text-align: center; max-width: 460px; }
+  .code { font-size: 64px; font-weight: 800; color: #FF2442; letter-spacing: 2px; }
+  h1 { font-size: 22px; margin: 6px 0 12px; }
+  p { color: #6b6b6b; font-size: 15px; line-height: 1.7; }
+  .acts { margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  a { display: inline-block; text-decoration: none; font-size: 15px; font-weight: 600;
+      padding: 11px 22px; border-radius: 10px; }
+  a.go { background: #FF2442; color: #fff; box-shadow: 0 10px 22px -8px rgba(255,36,66,.5); }
+  a.gh { background: #fff; color: #1a1a1a; border: 1px solid #eee; }
+  .langs { position: fixed; top: 16px; right: 18px; display: flex; gap: 4px; }
+  .langs button { border: 1px solid rgba(255,255,255,.9); background: rgba(255,255,255,.6);
+                  color: #8a6f66; font-size: 12px; padding: 3px 10px; border-radius: 999px;
+                  cursor: pointer; font-family: inherit; }
+  .langs button.on { background: #fff; color: #FF2442; font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="langs" id="langs"></div>
+  <div class="box">
+    <div class="code">404</div>
+    <h1 id="h"></h1>
+    <p id="p"></p>
+    <div class="acts">
+      <a class="go" id="home" href="/"></a>
+      <a class="gh" href="https://github.com/wumaohua233/marksync">GitHub</a>
+    </div>
+  </div>
+
+<script>
+// 这个文件同时给两个平台用：
+//   Cloudflare Pages —— 未匹配的路径会返回它并带 404 状态码。
+//     不加它的话 Pages 会把任何陌生路径都兜底成首页 + 200，
+//     于是 /dl/已删除的版本.zip 会下载到一个 HTML 文件而不是干净地 404。
+//   GitHub Pages —— 作为自定义 404 页。
+// 链接一律用绝对路径（/），因为 404 可能发生在任意层级。
+const I18N = {
+  zh_CN: { h: "这里没有东西", p: "地址可能打错了，或者这个版本的安装包已经被删掉了。回首页看看最新版本。", b: "回首页" },
+  en:    { h: "Nothing here", p: "The link may be mistyped, or that build has been removed. Head back home for the latest version.", b: "Back to home" },
+  ja:    { h: "ここには何もありません", p: "アドレスが間違っているか、そのバージョンのファイルが削除された可能性があります。最新版はホームから。", b: "ホームへ" },
+};
+const NAMES = { zh_CN: "中文", en: "EN", ja: "日本語" };
+const saved = localStorage.getItem("marksync-lang");
+const b = (navigator.language || "en").toLowerCase();
+let lang = (saved && I18N[saved]) || (b.startsWith("zh") ? "zh_CN" : b.startsWith("ja") ? "ja" : "en");
+
+function apply(l) {
+  lang = l;
+  localStorage.setItem("marksync-lang", l);
+  const d = I18N[l];
+  document.documentElement.lang = l.replace("_", "-");
+  document.getElementById("h").textContent = d.h;
+  document.getElementById("p").textContent = d.p;
+  document.getElementById("home").textContent = d.b;
+  document.getElementById("langs").innerHTML = Object.keys(I18N)
+    .map(k => `<button data-lang="${k}" class="${k === l ? "on" : ""}">${NAMES[k]}</button>`).join("");
+  document.querySelectorAll("#langs button").forEach(x =>
+    x.addEventListener("click", () => apply(x.dataset.lang)));
+}
+apply(lang);
+</script>
+</body>
+</html>

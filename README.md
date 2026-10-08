@@ -92,9 +92,14 @@ bash scripts/pack.sh
 | 平台 | 地址 | 配置 |
 |---|---|---|
 | GitHub Pages | `wumaohua233.github.io/marksync/` | 仓库 Settings → Pages → 分支 `main` / 目录 `/docs` |
-| Cloudflare Pages | `marksync.pages.dev` | 构建命令**留空**，输出目录填 `docs` |
+| Cloudflare Pages | `getmarksync.pages.dev` | 构建命令**留空**，输出目录填 `docs` |
+
+> 子域名为什么不是 `marksync.pages.dev`：那个已经被占用了，Cloudflare 会退而给 `marksync-468.pages.dev`。
+> 选 `getmarksync` 是为了拿到一个干净好记的地址。以后上自定义域名的话这个就不重要了。
 
 Cloudflare Pages 会读 `docs/_headers`（缓存与安全头），且把 `docs/` 内容发布在**根路径**——地址里不会多一层 `/marksync/`。
+
+`docs/404.html` 两个平台都会用到：Cloudflare Pages 靠它才能对未知路径返回 **404 而不是兕底成首页**（否则 `/dl/已删除的版本.zip` 会下载到一个 HTML 文件），GitHub Pages 则把它当自定义 404 页。
 
 ### 发行机制
 
