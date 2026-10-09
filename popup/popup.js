@@ -86,7 +86,10 @@ function renderStatus(status) {
   const nextStr = status.nextRun ? escapeHtml(t("statusNextRun", fmtSmart(status.nextRun))) : "";
   const errStr = errs.length ? ` · ${errs.join(" · ")}` : "";
   const okStr = errs.length ? "" : escapeHtml(t("statusAllOk"));
-  el.innerHTML = escapeHtml(t("statusLastCheck", fmtSmart(r.at))) + nextStr + (errStr || okStr);
+  // 首次同步只建立基线：清单里那批是标了「已读」的存量，不解释一句用户会困惑
+  const firstStr = r.firstRun ? `<div class="first-run">${escapeHtml(t("firstRunNote"))}</div>` : "";
+  el.innerHTML =
+    escapeHtml(t("statusLastCheck", fmtSmart(r.at))) + nextStr + (errStr || okStr) + firstStr;
 
   el.querySelectorAll(".login-inline").forEach((btn) => {
     btn.addEventListener("click", (e) => {

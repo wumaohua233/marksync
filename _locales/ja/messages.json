@@ -133,6 +133,9 @@
   "statusNeverRun": {
     "message": "まだ確認していません。「同期」を押して開始してください。"
   },
+  "firstRunNote": {
+    "message": "初回同期でベースラインを作成しました。既存の保存履歴はリストに入れず、これ以降の新着だけが表示されます。"
+  },
   "statusLastCheck": {
     "message": "前回の確認 $1"
   },

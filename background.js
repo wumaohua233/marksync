@@ -7,6 +7,13 @@ import { t, UI_LANG } from "./lib/i18n.js";
 
 const ALARM_NAME = "shouchang-check";
 const NET_RETRY_ALARM = "shouchang-netretry"; // 网络没就绪时的重试闹钟
+
+// 首次同步每个源最多放进清单的条数。
+//
+// 「存量」是旧账，不是「新来的」。全量灌进去的后果：角标变成几千、
+// 通知弹「有 3847 条新收藏」、清单长到没法看——这个工具的卖点是
+// 「从安装起不再让新收藏吃灰」，第一次就把历史摊开等于没有重点。
+const FIRST_RUN_KEEP = 30;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 let running = false;
@@ -798,27 +805,31 @@ async function runCheck(trigger, onlyPlatform) {
     }
 
     // 2. diff 与入库
+    const isFirstRun = !settings.firstRunDone;
     for (const [source, items] of Object.entries(collected)) {
       const seen = await store.getSeen(source);
       const fresh = items.filter((it) => !seen[it.id]);
+      // 采集到的 id 全部记入 seen（含首跑没入库的那部分），
+      // 否则旧条目会在后续某次同步里冒出来当「新增」。
       await store.addSeen(
         source,
         items.map((it) => it.id)
       );
-      // 首跑：存量全部入库展示；之后只入新增
-      const toStore = settings.firstRunDone ? fresh : items;
+      // 首跑：只入最近 FIRST_RUN_KEEP 条，且标成**已读** —— 角标从 0 开始，不弹通知。
+      // 之后：只入真正新增的，标 new，参与角标与通知。
+      const toStore = isFirstRun ? items.slice(0, FIRST_RUN_KEEP) : fresh;
       const now = Date.now();
       const entries = toStore.map((it, idx) => ({
         ...it,
         key: `${source}:${it.id}`,
         source,
         platform: store.SOURCES[source].platform,
-        status: "new",
+        status: isFirstRun ? "read" : "new",
         firstSeenAt: now,
         seq: idx, // 抓取列表中的位次（0 = 最新收藏），保留平台的倒序
       }));
       if (entries.length) await store.upsertItems(entries);
-      allNew.push(...entries);
+      if (!isFirstRun) allNew.push(...entries); // 首跑不进 allNew ⇒ 不弹通知、不进角标
       results[source] = { ok: true, total: items.length, new: fresh.length };
     }
 
@@ -842,6 +853,8 @@ async function runCheck(trigger, onlyPlatform) {
       durationMs: Date.now() - startedAt,
       results: finalResults,
       newCount: allNew.length,
+      // 让弹窗能说一句「首次同步发生了什么」——不然用户看到一批灰色条目会困惑
+      firstRun: isFirstRun,
     });
     // 记录本次涉及平台的同步时间（下拉菜单"上次同步"显示用）
     const syncedPlatforms = new Set(enabled.map((s) => store.SOURCES[s]?.platform).filter(Boolean));
