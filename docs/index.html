@@ -79,7 +79,8 @@
   .dl .arr { font-size: 20px; }
   .dl-note { display: block; margin-top: 16px; font-size: 13px; color: rgba(110,110,115,.85); }
 
-  .plats { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; margin-top: 44px; }
+  .plats-lead { margin-top: 46px; font-size: 12.5px; letter-spacing: .18em; color: rgba(110,110,115,.65); }
+  .plats { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; margin-top: 12px; }
   .plat { background: rgba(255,255,255,.5); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.8); border-radius: 999px; padding: 7px 17px; font-size: 13.5px; font-weight: 500; color: #55443f; box-shadow: 0 6px 18px -8px rgba(80,50,60,.18); transition: transform .15s ease; }
   .plat:hover { transform: translateY(-2px); }
 
@@ -152,9 +153,10 @@
   <header class="hero">
     <img class="logo" src="icon.png" alt="MarkSync" width="108" height="108">
     <h1 data-i18n="name">MarkSync</h1>
-    <p class="sub" data-i18n-html="tagline">自动同步你在各平台的<em>收藏与点赞</em>，攒成一份待看清单 —— 专治"刷到就收藏，收藏就吃灰"。</p>
+    <p class="sub" data-i18n-html="tagline">自动同步你在各平台的<em>收藏与点赞</em>，专治"刷到就收藏，收藏就吃灰"。</p>
     <a class="dl" id="dl" href="https://github.com/wumaohua233/marksync/releases/latest"><span class="arr">⬇</span> <span data-i18n="dl">下载插件</span></a>
-    <span class="dl-note" data-i18n="dlNote">免费开源 · 纯本地 · 不上传任何数据</span>
+    <span class="dl-note" data-i18n="dlNote">纯本地 · 不上传任何数据</span>
+    <p class="plats-lead" data-i18n="platLead">现已支持</p>
     <div class="plats" id="plats"></div>
     <div class="scroll-hint" aria-hidden="true">⌄</div>
   </header>
@@ -226,8 +228,8 @@ const I18N = {
   zh_CN: {
     title: "MarkSync — 收藏点赞同步",
     name: "MarkSync",
-    tagline: '自动同步你在各平台的<em>收藏与点赞</em>，攒成一份待看清单 —— 专治"刷到就收藏，收藏就吃灰"。',
-    dl: "下载插件", dlNote: "免费开源 · 纯本地 · 不上传任何数据",
+    tagline: '自动同步你在各平台的<em>收藏与点赞</em>，专治"刷到就收藏，收藏就吃灰"。',
+    dl: "下载插件", dlNote: "纯本地 · 不上传任何数据", platLead: "现 已 支 持",
     installN: "3 步", installTitle: "安装",
     installLead: "Chrome 非商店扩展需要「开发者模式」加载，一次装好，之后自动用。<b>注意：先解压，再选文件夹 —— zip 本身拖不进去。</b>",
     s1t: "下载并解压（别把 zip 直接拖进 Chrome）", s1d: "点上面的按钮下载 zip，双击解压，得到一个 marksync 文件夹。注意：Chrome 不会处理没解压的 zip，直接拖进去只会报「无法加载扩展程序」。",
@@ -260,8 +262,8 @@ const I18N = {
   en: {
     title: "MarkSync — saved & liked, all in one list",
     name: "MarkSync",
-    tagline: 'Syncs new <em>saves and likes</em> from every platform into one list — so the things you saved for later actually get looked at.',
-    dl: "Download", dlNote: "Free & open source · Fully local · Nothing is uploaded",
+    tagline: 'Syncs new <em>saves and likes</em> from every platform — so the things you saved for later actually get looked at.',
+    dl: "Download", dlNote: "Fully local · Nothing is uploaded", platLead: "N O W  S U P P O R T I N G",
     installN: "3 steps", installTitle: "to install",
     installLead: "Extensions outside the Chrome Web Store load in Developer mode. Set it up once, then forget about it. <b>Important: unzip first, then pick the folder — Chrome can't install the zip itself.</b>",
     s1t: "Download and unzip (don't drag the zip into Chrome)", s1d: "Hit the button above, then unzip it — you'll get a folder called marksync. Note: Chrome can't install a zip that has a folder inside it, so dragging the zip straight in just shows an error.",
@@ -294,8 +296,8 @@ const I18N = {
   ja: {
     title: "MarkSync — 保存といいねをひとつのリストに",
     name: "MarkSync",
-    tagline: "各プラットフォームの<em>保存といいね</em>を自動で同期して、ひとつのリストに。あとで見るつもりが溜まったまま、を解消します。",
-    dl: "ダウンロード", dlNote: "無料・オープンソース · 完全ローカル · 送信なし",
+    tagline: "各プラットフォームの<em>保存といいね</em>を自動で同期。あとで見るつもりが溜まったまま、を解消します。",
+    dl: "ダウンロード", dlNote: "完全ローカル · 送信なし", platLead: "対 応 中",
     installN: "3 ステップ", installTitle: "でインストール",
     installLead: "Chrome ウェブストア以外の拡張機能は「デベロッパーモード」で読み込みます。一度設定すれば、あとは自動です。<b>重要：先に解凍し、フォルダを選んでください。zip のままではインストールできません。</b>",
     s1t: "ダウンロードして解凍（zip を直接ドラッグしない）", s1d: "上のボタンで zip をダウンロードし、必ず解凍してください。marksync フォルダができます。注意：中にフォルダがある zip は Chrome がインストールできず、そのままドラッグするとエラーになります。",
