@@ -79,7 +79,7 @@
   <div class="wrap">
     <section>
       <h2><span class="n" data-i18n="installN">3 步</span> <span data-i18n="installTitle">安装</span></h2>
-      <p class="lead" data-i18n="installLead">Chrome 非商店扩展需要「开发者模式」加载，一次装好，之后自动用。</p>
+      <p class="lead" data-i18n-html="installLead">Chrome 非商店扩展需要「开发者模式」加载，一次装好，之后自动用。<b>注意：先解压，再选文件夹 —— zip 本身拖不进去。</b></p>
       <div class="step"><div class="idx">1</div><div class="body"><div class="t" data-i18n="s1t">下载并解压</div><div class="d" data-i18n="s1d">点上面的按钮下载 zip，解压得到一个 marksync 文件夹。</div></div></div>
       <div class="step"><div class="idx">2</div><div class="body"><div class="t" data-i18n="s2t">打开扩展页，开「开发者模式」</div><div class="d" data-i18n-html="s2d">Chrome 地址栏输入 <code>chrome://extensions</code> 回车，打开右上角的「开发者模式」开关。</div></div></div>
       <div class="step"><div class="idx">3</div><div class="body"><div class="t" data-i18n="s3t">加载已解压的扩展程序</div><div class="d" data-i18n="s3d">点「加载已解压的扩展程序」，选中第 1 步解压出的那个文件夹 —— 装好了。</div></div></div>
@@ -144,8 +144,8 @@ const I18N = {
     tagline: '自动同步你在各平台的<em>收藏与点赞</em>，攒成一份待看清单 —— 专治"刷到就收藏，收藏就吃灰"。',
     dl: "下载插件", dlNote: "免费开源 · 纯本地 · 不上传任何数据",
     installN: "3 步", installTitle: "安装",
-    installLead: "Chrome 非商店扩展需要「开发者模式」加载，一次装好，之后自动用。",
-    s1t: "下载并解压", s1d: "点上面的按钮下载 zip，解压得到一个 marksync 文件夹。",
+    installLead: "Chrome 非商店扩展需要「开发者模式」加载，一次装好，之后自动用。<b>注意：先解压，再选文件夹 —— zip 本身拖不进去。</b>",
+    s1t: "下载并解压（别把 zip 直接拖进 Chrome）", s1d: "点上面的按钮下载 zip，双击解压，得到一个 marksync 文件夹。注意：Chrome 不会处理没解压的 zip，直接拖进去只会报「无法加载扩展程序」。",
     s2t: "打开扩展页，开「开发者模式」", s2d: 'Chrome 地址栏输入 <code>chrome://extensions</code> 回车，打开右上角的「开发者模式」开关。',
     s3t: "加载已解压的扩展程序", s3d: "点「加载已解压的扩展程序」，选中第 1 步解压出的那个文件夹 —— 装好了。",
     s4t: "开始用", s4d: "在浏览器登录你要追的平台网页版，点插件图标 →「同步」。",
@@ -178,8 +178,8 @@ const I18N = {
     tagline: 'Syncs new <em>saves and likes</em> from every platform into one list — so the things you saved for later actually get looked at.',
     dl: "Download", dlNote: "Free & open source · Fully local · Nothing is uploaded",
     installN: "3 steps", installTitle: "to install",
-    installLead: "Extensions outside the Chrome Web Store load in Developer mode. Set it up once, then forget about it.",
-    s1t: "Download and unzip", s1d: "Hit the button above, then unzip. You'll get a folder called marksync.",
+    installLead: "Extensions outside the Chrome Web Store load in Developer mode. Set it up once, then forget about it. <b>Important: unzip first, then pick the folder — Chrome can't install the zip itself.</b>",
+    s1t: "Download and unzip (don't drag the zip into Chrome)", s1d: "Hit the button above, then unzip it — you'll get a folder called marksync. Note: Chrome can't install a zip that has a folder inside it, so dragging the zip straight in just shows an error.",
     s2t: "Open the extensions page and enable Developer mode", s2d: 'Go to <code>chrome://extensions</code> and flip the "Developer mode" switch in the top-right corner.',
     s3t: "Load the unpacked extension", s3d: 'Click "Load unpacked" and pick the folder you unzipped in step 1. Done.',
     s4t: "Start using it", s4d: "Log in to whichever platforms you use in your browser, then click the icon and hit Sync.",
@@ -212,8 +212,8 @@ const I18N = {
     tagline: "各プラットフォームの<em>保存といいね</em>を自動で同期して、ひとつのリストに。あとで見るつもりが溜まったまま、を解消します。",
     dl: "ダウンロード", dlNote: "無料・オープンソース · 完全ローカル · 送信なし",
     installN: "3 ステップ", installTitle: "でインストール",
-    installLead: "Chrome ウェブストア以外の拡張機能は「デベロッパーモード」で読み込みます。一度設定すれば、あとは自動です。",
-    s1t: "ダウンロードして解凍", s1d: "上のボタンで zip をダウンロードし、解凍します。marksync というフォルダが出てきます。",
+    installLead: "Chrome ウェブストア以外の拡張機能は「デベロッパーモード」で読み込みます。一度設定すれば、あとは自動です。<b>重要：先に解凍し、フォルダを選んでください。zip のままではインストールできません。</b>",
+    s1t: "ダウンロードして解凍（zip を直接ドラッグしない）", s1d: "上のボタンで zip をダウンロードし、必ず解凍してください。marksync フォルダができます。注意：中にフォルダがある zip は Chrome がインストールできず、そのままドラッグするとエラーになります。",
     s2t: "拡張機能ページを開き、デベロッパーモードをオン", s2d: 'アドレスバーに <code>chrome://extensions</code> と入力して開き、右上の「デベロッパーモード」をオンにします。',
     s3t: "パッケージ化されていない拡張機能を読み込む", s3d: "「パッケージ化されていない拡張機能を読み込む」をクリックし、手順 1 で解凍したフォルダを選びます。完了です。",
     s4t: "使ってみる", s4d: "ブラウザで各プラットフォームにログインし、拡張機能のアイコンをクリックして「同期」を押します。",

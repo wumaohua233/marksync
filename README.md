@@ -38,13 +38,21 @@
 
 ### 从网站下载（推荐）
 
-打开 **https://wumaohua233.github.io/marksync/** ，点下载按钮，然后：
+打开 **https://getmarksync.pages.dev/** （或 [GitHub Pages 备用站](https://wumaohua233.github.io/marksync/)），点下载按钮，然后：
 
-1. 解压 zip，得到一个 `marksync` 文件夹
+1. **解压 zip**，得到一个 `marksync` 文件夹
 2. Chrome 打开 `chrome://extensions`，开启右上角「开发者模式」
 3. 点「加载已解压的扩展程序」，选中那个 `marksync` 文件夹
 4. 在浏览器登录你要用的平台网页版
 5. 点插件图标 →「同步」
+
+> ⚠️ **不要把 zip 直接拖进 `chrome://extensions`。**
+> Chrome 确实支持拖 zip，但它会到**解压根目录**找 `manifest.json`
+> （`extensions/browser/zipfile_installer.cc`），而我们的 zip 顶层是 `marksync/` 文件夹，
+> 所以只会报「无法加载扩展程序…Could not unzip extension for install」。
+>
+> 这一层同名文件夹是故意的：不加它，用户手动解压时会把一堆文件撒在下载目录里。
+> 代价就是拖拽安装用不了——只能走「加载已解压」那条路。
 
 > 下载按钮指向的是**同源**的 `dl/marksync-v*.zip`，不经过 GitHub。
 > 直连 GitHub 不稳的网络下，这是能不能装上的关键。
