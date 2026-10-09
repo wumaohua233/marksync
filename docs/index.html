@@ -9,77 +9,158 @@
 <meta name="description" content="自动同步小红书/抖音/YouTube/X/TikTok/Instagram 的收藏与点赞新增。纯本地、开源、不上传任何数据。">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  :root { --red: #FF2442; --ink: #1a1a1a; --gray: #6b6b6b; --line: #eee; }
-  body { font-family: -apple-system, "PingFang SC", "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif; color: var(--ink); line-height: 1.6; background: #fff; }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 0 22px; }
+  :root {
+    --red: #FF2442;
+    --ink: #1c1c1e;
+    --gray: #6e6e73;
+    --glass: rgba(255, 255, 255, .55);
+    --glass-border: rgba(255, 255, 255, .75);
+    --shadow: 0 24px 60px -24px rgba(60, 40, 90, .18);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif;
+    color: var(--ink);
+    line-height: 1.65;
+    background: #fbfbfd;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
   a { color: inherit; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 22px; position: relative; z-index: 2; }
 
-  .hero { background: linear-gradient(160deg, #FFF1EC 0%, #FFE0D6 100%); padding: 56px 0 52px; text-align: center; position: relative; }
-  .logo { width: 76px; height: 76px; border-radius: 20px; display: inline-block; box-shadow: 0 14px 30px -10px rgba(255,36,66,.45); }
-  h1 { font-size: 40px; font-weight: 800; margin: 12px 0 10px; letter-spacing: 1px; }
-  .sub { font-size: 17px; color: var(--gray); max-width: 540px; margin: 0 auto 6px; }
+  /* ---------- iOS 26 流动极光背景 ---------- */
+  .aurora { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55; will-change: transform; }
+  .b1 { width: 55vmax; height: 55vmax; left: -18vmax; top: -20vmax; background: radial-gradient(circle at 35% 35%, #ffd3c7, #ffb3a1 60%, transparent 72%); animation: drift1 26s ease-in-out infinite alternate; }
+  .b2 { width: 48vmax; height: 48vmax; right: -16vmax; top: -8vmax; background: radial-gradient(circle at 60% 40%, #ffe3ee, #ffc2d6 55%, transparent 70%); animation: drift2 32s ease-in-out infinite alternate; }
+  .b3 { width: 42vmax; height: 42vmax; left: 22vw; top: 60vh; background: radial-gradient(circle at 50% 50%, #e6e0ff, #d3f0ff 55%, transparent 72%); opacity: .45; animation: drift3 38s ease-in-out infinite alternate; }
+  .b4 { width: 36vmax; height: 36vmax; right: 4vw; bottom: -14vmax; background: radial-gradient(circle at 50% 50%, #fff1d6, #ffe1b8 55%, transparent 70%); opacity: .4; animation: drift1 30s ease-in-out infinite alternate-reverse; }
+  @keyframes drift1 { to { transform: translate(6vmax, 4vmax) scale(1.12); } }
+  @keyframes drift2 { to { transform: translate(-5vmax, 6vmax) scale(1.08) rotate(12deg); } }
+  @keyframes drift3 { to { transform: translate(4vmax, -5vmax) scale(1.15); } }
+  @media (prefers-reduced-motion: reduce) { .blob { animation: none; } .reveal { opacity: 1 !important; transform: none !important; } }
+
+  /* ---------- 玻璃拟态 ---------- */
+  .glass {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(28px) saturate(1.7);
+    backdrop-filter: blur(28px) saturate(1.7);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.8);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero { min-height: 96vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 90px 22px 70px; position: relative; z-index: 2; }
+  .langs { position: fixed; top: 18px; right: 20px; z-index: 10; display: flex; gap: 6px; padding: 5px; border-radius: 999px; }
+  .langs button { border: none; background: transparent; color: var(--gray); font-size: 12.5px; font-weight: 500; padding: 5px 13px; border-radius: 999px; cursor: pointer; font-family: inherit; transition: all .18s ease; }
+  .langs button:hover { color: var(--ink); }
+  .langs button.on { background: rgba(255,255,255,.95); color: var(--red); font-weight: 600; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+
+  .logo { width: 108px; height: 108px; border-radius: 27%; display: block; margin-bottom: 34px; box-shadow: 0 24px 50px -14px rgba(255,36,66,.5), 0 2px 8px rgba(255,36,66,.25); animation: float 5s ease-in-out infinite; }
+  @keyframes float { 50% { transform: translateY(-9px); } }
+  @media (prefers-reduced-motion: reduce) { .logo { animation: none; } }
+
+  h1 { font-size: clamp(46px, 9vw, 84px); font-weight: 800; letter-spacing: -.035em; line-height: 1.05; }
+  .sub { font-size: clamp(16px, 2.4vw, 20px); color: var(--gray); max-width: 560px; margin: 18px auto 0; letter-spacing: -.01em; }
   .sub em { font-style: normal; color: var(--red); font-weight: 600; }
-  .dl { display: inline-flex; align-items: center; gap: 8px; margin-top: 26px; background: var(--red); color: #fff; font-size: 17px; font-weight: 600; padding: 14px 30px; border-radius: 12px; text-decoration: none; box-shadow: 0 12px 28px -8px rgba(255,36,66,.5); transition: transform .12s; }
-  .dl:hover { transform: translateY(-2px); }
-  .dl[aria-disabled="true"] { opacity: .6; pointer-events: none; }
-  .dl-note { display: block; margin-top: 12px; font-size: 13px; color: #a98; }
-  .plats { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 30px; }
-  .plat { background: rgba(255,255,255,.75); border: 1px solid #fff; border-radius: 999px; padding: 6px 15px; font-size: 13px; font-weight: 500; color: #5a3e38; }
 
-  .langs { position: absolute; top: 16px; right: 18px; display: flex; gap: 4px; }
-  .langs button { border: 1px solid rgba(255,255,255,.9); background: rgba(255,255,255,.6); color: #8a6f66; font-size: 12px; padding: 3px 10px; border-radius: 999px; cursor: pointer; font-family: inherit; }
-  .langs button:hover { background: #fff; }
-  .langs button.on { background: #fff; color: var(--red); font-weight: 600; }
+  .dl {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: 40px;
+    background: linear-gradient(180deg, #ff4d63, var(--red) 55%, #f01230);
+    color: #fff; font-size: 18px; font-weight: 600; letter-spacing: .01em;
+    padding: 17px 40px; border-radius: 999px; text-decoration: none;
+    box-shadow: 0 18px 40px -10px rgba(255,36,66,.55), inset 0 1.5px 1px rgba(255,255,255,.45), inset 0 -2px 6px rgba(160,0,25,.3);
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease;
+  }
+  .dl:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 24px 50px -10px rgba(255,36,66,.6), inset 0 1.5px 1px rgba(255,255,255,.45), inset 0 -2px 6px rgba(160,0,25,.3); }
+  .dl:active { transform: translateY(0) scale(.98); }
+  .dl .arr { font-size: 20px; }
+  .dl-note { display: block; margin-top: 16px; font-size: 13px; color: rgba(110,110,115,.85); }
 
-  section { padding: 50px 0; border-bottom: 1px solid var(--line); }
-  h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .plats { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; margin-top: 44px; }
+  .plat { background: rgba(255,255,255,.5); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.8); border-radius: 999px; padding: 7px 17px; font-size: 13.5px; font-weight: 500; color: #55443f; box-shadow: 0 6px 18px -8px rgba(80,50,60,.18); transition: transform .15s ease; }
+  .plat:hover { transform: translateY(-2px); }
+
+  .scroll-hint { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); color: rgba(110,110,115,.5); font-size: 22px; animation: bob 2.2s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translate(-50%, 7px); } }
+  @media (prefers-reduced-motion: reduce) { .scroll-hint { animation: none; } }
+
+  /* ---------- 内容卡片 ---------- */
+  main { position: relative; z-index: 2; padding-bottom: 30px; }
+  .card { padding: 38px 36px; margin-bottom: 26px; }
+  h2 { font-size: 25px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 6px; }
   h2 .n { color: var(--red); }
-  .lead { color: var(--gray); margin-bottom: 26px; }
+  .lead { color: var(--gray); font-size: 15px; margin-bottom: 24px; }
+  .lead b { color: var(--ink); }
 
-  .step { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px dashed #eee; }
-  .step:last-child { border-bottom: none; }
-  .step .idx { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: var(--red); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-  .step .body { flex: 1; }
-  .step .t { font-weight: 600; }
-  .step .d { color: var(--gray); font-size: 14px; margin-top: 2px; }
-  code { background: #f4f4f5; border-radius: 5px; padding: 1px 7px; font-family: "SF Mono", Menlo, monospace; font-size: 13px; color: #d4380d; }
+  .step { display: flex; gap: 16px; padding: 15px 0; border-bottom: 1px solid rgba(0,0,0,.05); }
+  .step:last-of-type { border-bottom: none; }
+  .step .idx { flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(180deg, #ff4d63, var(--red)); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 6px 14px -4px rgba(255,36,66,.5); margin-top: 2px; }
+  .step .t { font-weight: 600; font-size: 15.5px; letter-spacing: -.01em; }
+  .step .d { color: var(--gray); font-size: 14px; margin-top: 3px; }
+  code { background: rgba(0,0,0,.05); border-radius: 6px; padding: 1.5px 8px; font-family: "SF Mono", Menlo, monospace; font-size: 12.5px; color: #d4380d; }
 
-  pre { background: #1f1f22; color: #e6e6e6; border-radius: 10px; padding: 14px 16px; overflow-x: auto; margin: 10px 0 0; }
-  pre code { background: none; color: inherit; padding: 0; font-size: 12.5px; line-height: 1.7; }
-  pre .c { color: #7d8590; }
+  pre { background: rgba(28,28,30,.92); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: #e8e8ea; border-radius: 16px; padding: 15px 18px; overflow-x: auto; margin: 12px 0 0; border: 1px solid rgba(255,255,255,.1); }
+  pre code { background: none; color: inherit; padding: 0; font-size: 12.5px; line-height: 1.75; }
+  pre .c { color: #8e8e93; }
+
+  .callout { background: rgba(255,247,230,.7); border: 1px solid rgba(255,224,178,.9); border-radius: 16px; padding: 14px 17px; font-size: 13.5px; color: #96622a; margin-top: 22px; }
+  .privacy { background: rgba(240,249,244,.7); border: 1px solid rgba(198,233,212,.9); border-radius: 16px; padding: 17px 19px; font-size: 14px; color: #2a6b47; }
+  .privacy .pt { font-weight: 700; margin-bottom: 5px; }
+  .ver { font-size: 13px; color: var(--gray); margin-top: 18px; text-align: center; }
+  .ver a { color: var(--red); text-decoration: none; border-bottom: 1px solid rgba(255,36,66,.3); }
 
   .feat { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .feat .f { background: #fafafa; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
-  .feat .f .ft { font-weight: 600; margin-bottom: 3px; }
-  .feat .f .fd { font-size: 13px; color: var(--gray); }
+  .feat .f { background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.8); border-radius: 20px; padding: 18px 19px; transition: transform .16s ease, box-shadow .16s ease; }
+  .feat .f:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -14px rgba(60,40,90,.2); }
+  .feat .ft { font-weight: 600; font-size: 15px; margin-bottom: 3px; letter-spacing: -.01em; }
+  .feat .fd { font-size: 13px; color: var(--gray); }
 
-  .callout { background: #FFF7E6; border: 1px solid #FFE1B3; border-radius: 12px; padding: 16px 18px; font-size: 14px; color: #96622a; margin-top: 24px; }
-  .privacy { background: #F0F9F4; border: 1px solid #C6E9D4; border-radius: 12px; padding: 18px 20px; font-size: 14px; color: #2a6b47; margin-top: 22px; }
-  .privacy .pt { font-weight: 700; margin-bottom: 6px; }
-  .ver { font-size: 13px; color: var(--gray); margin-top: 10px; }
-  .ver a { color: var(--red); text-decoration: none; }
+  details.card { padding: 0; overflow: hidden; }
+  details summary { list-style: none; cursor: pointer; padding: 26px 36px; display: flex; align-items: center; justify-content: space-between; font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "＋"; color: var(--red); font-size: 22px; font-weight: 400; transition: transform .25s ease; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details .body-in { padding: 0 36px 34px; }
 
-  footer { text-align: center; padding: 36px 0 46px; color: #aaa; font-size: 13px; }
+  footer { text-align: center; padding: 20px 0 54px; color: rgba(110,110,115,.75); font-size: 13px; position: relative; z-index: 2; }
   footer a { color: var(--red); text-decoration: none; }
 
-  @media (max-width: 560px) { h1 { font-size: 32px; } .feat { grid-template-columns: 1fr; } .langs { position: static; justify-content: center; margin-bottom: 18px; } }
+  /* ---------- 入场动画 ---------- */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.22,1,.36,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 600px) {
+    .card { padding: 28px 24px; border-radius: 26px; }
+    details summary { padding: 22px 24px; font-size: 17px; }
+    details .body-in { padding: 0 24px 26px; }
+    .feat { grid-template-columns: 1fr; }
+    .logo { width: 92px; height: 92px; }
+    .hero { padding-top: 76px; }
+  }
 </style>
 </head>
 <body>
-  <div class="hero">
-    <div class="wrap">
-      <div class="langs" id="langs"></div>
-      <img class="logo" src="icon.png" alt="MarkSync" width="76" height="76">
-      <h1 data-i18n="name">MarkSync</h1>
-      <p class="sub" data-i18n-html="tagline">自动同步你在各平台的<em>收藏与点赞</em>，攒成一份待看清单 —— 专治"刷到就收藏，收藏就吃灰"。</p>
-      <a class="dl" id="dl" href="https://github.com/wumaohua233/marksync/releases/latest">⬇ <span data-i18n="dl">下载插件</span></a>
-      <span class="dl-note" data-i18n="dlNote">免费开源 · 纯本地 · 不上传任何数据</span>
-      <div class="plats" id="plats"></div>
-    </div>
+  <div class="aurora" aria-hidden="true">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
   </div>
 
-  <div class="wrap">
-    <section>
+  <div class="langs glass" id="langs"></div>
+
+  <header class="hero">
+    <img class="logo" src="icon.png" alt="MarkSync" width="108" height="108">
+    <h1 data-i18n="name">MarkSync</h1>
+    <p class="sub" data-i18n-html="tagline">自动同步你在各平台的<em>收藏与点赞</em>，攒成一份待看清单 —— 专治"刷到就收藏，收藏就吃灰"。</p>
+    <a class="dl" id="dl" href="https://github.com/wumaohua233/marksync/releases/latest"><span class="arr">⬇</span> <span data-i18n="dl">下载插件</span></a>
+    <span class="dl-note" data-i18n="dlNote">免费开源 · 纯本地 · 不上传任何数据</span>
+    <div class="plats" id="plats"></div>
+    <div class="scroll-hint" aria-hidden="true">⌄</div>
+  </header>
+
+  <main class="wrap">
+    <section class="card glass reveal">
       <h2><span class="n" data-i18n="installN">3 步</span> <span data-i18n="installTitle">安装</span></h2>
       <p class="lead" data-i18n-html="installLead">Chrome 非商店扩展需要「开发者模式」加载，一次装好，之后自动用。<b>注意：先解压，再选文件夹 —— zip 本身拖不进去。</b></p>
       <div class="step"><div class="idx">1</div><div class="body"><div class="t" data-i18n="s1t">下载并解压</div><div class="d" data-i18n="s1d">点上面的按钮下载 zip，解压得到一个 marksync 文件夹。</div></div></div>
@@ -89,26 +170,7 @@
       <div class="callout" data-i18n="callout">💡 每次重启 Chrome 可能提示「要停用开发者模式扩展吗」，点「保留」别停用即可。这是 Chrome 对非商店扩展的常规提醒，不是出错。</div>
     </section>
 
-    <section>
-      <h2 data-i18n="upTitle">装了旧版怎么更新</h2>
-      <p class="lead" data-i18n="upLead">扩展会自己检查新版本，有新版本时弹出提示。更新有两条路：</p>
-      <div class="step"><div class="idx">A</div><div class="body">
-        <div class="t" data-i18n="upCmdT">命令行（最省事，推荐）</div>
-        <div class="d" data-i18n="upCmdD">装的时候用 git clone，以后一条命令更新。更新完回扩展页点一下刷新图标即可生效。</div>
-<pre><code><span class="c"># <span data-i18n="upCmdInstall">首次安装</span></span>
-git clone https://github.com/wumaohua233/marksync.git ~/marksync
-
-<span class="c"># <span data-i18n="upCmdUpdate">以后更新</span></span>
-cd ~/marksync &amp;&amp; git pull</code></pre>
-      </div></div>
-      <div class="step"><div class="idx">B</div><div class="body">
-        <div class="t" data-i18n="upManT">手动覆盖</div>
-        <div class="d" data-i18n="upManD">下载新 zip，解压后覆盖到原来那个文件夹（系统问「替换」就点替换），然后回 chrome://extensions 点一下 MarkSync 卡片上的刷新图标。</div>
-      </div></div>
-      <div class="callout" data-i18n="upNote">🔒 不用卸载旧的，覆盖就行。扩展 ID 是固定的，所以清单和已读记录不会丢 —— 它们存在浏览器里，不在扩展文件夹里。</div>
-    </section>
-
-    <section>
+    <section class="card glass reveal">
       <h2 data-i18n="featTitle">它能做什么</h2>
       <p class="lead" data-i18n="featLead">6 个平台的收藏/点赞，后台悄悄同步，攒成一份待看清单。</p>
       <div class="feat">
@@ -119,7 +181,28 @@ cd ~/marksync &amp;&amp; git pull</code></pre>
       </div>
     </section>
 
-    <section>
+    <details class="card glass reveal">
+      <summary data-i18n="upTitle">装了旧版怎么更新</summary>
+      <div class="body-in">
+        <p class="lead" data-i18n="upLead">扩展会自己检查新版本，有新版本时弹出提示。更新有两条路：</p>
+        <div class="step"><div class="idx">A</div><div class="body">
+          <div class="t" data-i18n="upCmdT">命令行（最省事，推荐）</div>
+          <div class="d" data-i18n="upCmdD">装的时候用 git clone，以后一条命令更新。更新完回扩展页点一下刷新图标即可生效。</div>
+<pre><code><span class="c"># <span data-i18n="upCmdInstall">首次安装</span></span>
+git clone https://github.com/wumaohua233/marksync.git ~/marksync
+
+<span class="c"># <span data-i18n="upCmdUpdate">以后更新</span></span>
+cd ~/marksync &amp;&amp; git pull</code></pre>
+        </div></div>
+        <div class="step"><div class="idx">B</div><div class="body">
+          <div class="t" data-i18n="upManT">手动覆盖</div>
+          <div class="d" data-i18n="upManD">下载新 zip，解压后覆盖到原来那个文件夹（系统问「替换」就点替换），然后回 chrome://extensions 点一下 MarkSync 卡片上的刷新图标。</div>
+        </div></div>
+        <div class="callout" data-i18n="upNote">🔒 不用卸载旧的，覆盖就行。扩展 ID 是固定的，所以清单和已读记录不会丢 —— 它们存在浏览器里，不在扩展文件夹里。</div>
+      </div>
+    </details>
+
+    <section class="card glass reveal">
       <h2 data-i18n="privTitle">数据与隐私</h2>
       <p class="lead" data-i18n="privLead">所有数据只存在你自己的浏览器里。没有服务器，没有账号，没有任何上报。</p>
       <div class="privacy">
@@ -128,7 +211,7 @@ cd ~/marksync &amp;&amp; git pull</code></pre>
       </div>
       <p class="ver" id="ver"></p>
     </section>
-  </div>
+  </main>
 
   <footer>
     <a href="https://github.com/wumaohua233/marksync">GitHub</a> · GPL-3.0 ·
@@ -295,7 +378,7 @@ function renderDl() {
   const dl = document.getElementById("dl");
   if (release?.zip) dl.href = release.zip;
   const v = release?.version ? " v" + release.version : "";
-  dl.innerHTML = `⬇ <span>${I18N[lang].dl}${v}</span>`;
+  dl.innerHTML = `<span class="arr">⬇</span> <span>${I18N[lang].dl}${v}</span>`;
 }
 
 function renderVersion() {
@@ -345,6 +428,12 @@ async function loadRelease() {
   renderDl();
   renderVersion();
 }
+
+// 入场动画：卡片滚动进视口时浮上来
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
 apply(lang);
 loadRelease();
