@@ -444,5 +444,8 @@
   },
   "obSyncedNone": {
     "message": "Nothing pulled yet — you may not be signed in anywhere. Sign in, then hit sync again."
+  },
+  "openSite": {
+    "message": "Open website"
   }
 }

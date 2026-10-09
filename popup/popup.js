@@ -2,7 +2,7 @@
 
 import * as store from "../lib/store.js";
 import { t, applyI18n, fmtSmart, fmtDate, fmtTime, fmtDateTime } from "../lib/i18n.js";
-import { checkUpdate, dismissUpdate, updateUrl } from "../lib/update.js";
+import { checkUpdate, dismissUpdate, updateUrl, SITE_URL } from "../lib/update.js";
 
 applyI18n(); // 先把 HTML 上 data-i18n 的静态文案翻掉
 
@@ -321,6 +321,9 @@ $("btn-read-all").addEventListener("click", async () => {
 });
 
 $("btn-settings").addEventListener("click", () => chrome.runtime.openOptionsPage());
+
+// 点标志/名字跳官网
+$("brand").addEventListener("click", () => chrome.tabs.create({ url: SITE_URL }));
 
 function csvCell(v) {
   const s = String(v == null ? "" : v);

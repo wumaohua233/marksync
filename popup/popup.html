@@ -35,6 +35,14 @@
     }
     .title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     h1 { font-size: 15px; font-weight: 650; display: flex; align-items: center; gap: 7px; letter-spacing: .1px; }
+    /* 标志+名字可点，跳官网。做成按钮而不是链接：它是个动作（开新标签），
+       不是导航；按钮也自带键盘可达性。 */
+    .brand { display: flex; align-items: center; gap: 7px; font: inherit; font-size: 15px; font-weight: 650;
+             color: inherit; background: none; border: none; padding: 0; cursor: pointer;
+             border-radius: 8px; transition: opacity .2s, transform .25s var(--ms-spring); }
+    .brand:hover { opacity: .68; }
+    .brand:active { transform: scale(.96); }
+    .brand:focus-visible { outline: 2px solid var(--ms-brand); outline-offset: 3px; }
     .brand-ico { width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; }
     .unread {
       background: var(--ms-brand); color: #fff; font-size: 11px; font-weight: 600;
@@ -218,7 +226,9 @@
   <div class="popup-root ms-scroll">
   <header>
     <div class="title-row">
-      <h1><img class="brand-ico" src="../icons/32.png" alt=""><span data-i18n="extName">MarkSync</span><span class="unread" id="unread" style="display:none"></span></h1>
+      <h1><button class="brand" id="brand" type="button" data-i18n-title="openSite">
+        <img class="brand-ico" src="../icons/32.png" alt=""><span data-i18n="extName">MarkSync</span>
+      </button><span class="unread" id="unread" style="display:none"></span></h1>
       <div class="actions">
         <button id="btn-export" data-i18n="btnExport">导出</button>
         <button id="btn-read-all" data-i18n="btnReadAll">全部已读</button>
