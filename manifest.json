@@ -3,6 +3,7 @@
   "default_locale": "zh_CN",
   "name": "__MSG_extName__",
   "version": "0.1.1",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiknhM+5Cq4tU4jNc7K2Hpx81ZuKMpmsANyRg+EOvFIAFUO06KgYgvN9sEUqzigdcDKIE5ulIbFX2NpuVcc1/Y+6PjHzYkGkHtI8NOyH1ju+utkBcQHXU1SGqcphMt/Mor8RcE8dkOfuADKpcco1Orei2BQmnNiB8fN09ryHzPI/TcPN64n2w13ovQ0fYpwhMzoNL9oQjUZSlMG12/UWF+t7o798gki2Rcjvao1PQadFA+d//xTdt3hbaWY5WA45EuP3MGLaXb0sKCbhOIUvnnbte+M4wD2jTQ/xdBlgvY3AOhOGUWTI2oxbHlvJkhMYDfDbKSJ5frllawKtI6kAouwIDAQAB",
   "description": "__MSG_extDesc__",
   "icons": {
     "16": "icons/16.png",

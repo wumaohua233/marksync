@@ -83,6 +83,33 @@ Chrome 会监视已解压目录的文件变化并**自动重新加载**,不用�
 
 > 更新不会动你的数据——清单和已读记录存在浏览器里,和扩展文件夹无关。
 
+## 扩展 ID 与签名密钥
+
+扩展的 unpacked ID 默认是**从文件夹绝对路径**哈希出来的。那意味着用户把 `marksync`
+文件夹换个位置、改个名，或更新时解压到了 `marksync (1)`，**ID 就变了，`chrome.storage`
+里的清单读不到 → 用户会以为数据丢了**，而且是静默的，不报错。
+
+所以 `manifest.json` 里加了一个固定的 `key`，ID 锁死为：
+
+```
+jdnlmjjgbfhphdnkecajlfjgeepelicb
+```
+
+这个 ID 已经用 Chrome 自己打包出的 CRX 反算验证过（从 CRX3 头部挖出公钥 →
+SHA256 → 前 16 字节按 0-15 映射成 a-p）。
+
+| | 位置 | 能不能公开 |
+|---|---|---|
+| **公钥** | `manifest.json` 的 `key` 字段 | ✅ 本来就要随扩展分发 |
+| **私钥** | `~/.marksync/extension-key.pem`（600） | ❌ 绝对不要进仓库 |
+| 私钥备份 | GitHub Secret `EXTENSION_PRIVATE_KEY` | 用于以后签名 CRX |
+
+私钥丢了**不会导致扩展挂掉**（ID 只靠 `key` 字段推导），但以后就没法签出同 ID 的 CRX 了。
+建议再加一份离线备份。
+
+> 用 Chrome 打包同 ID 的 CRX：
+> `chrome --pack-extension=<dir> --pack-extension-key=~/.marksync/extension-key.pem`
+
 ## 开发
 
 ```bash
