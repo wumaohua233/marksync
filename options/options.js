@@ -42,9 +42,20 @@ function renderSources(sources) {
   $("sources").innerHTML = html;
 }
 
+// 首次同步条数：按平台一个数字输入，上限 100（和引导页的滑块同一个值）
+function renderLimits(limits) {
+  $("limits").innerHTML = store.platforms().map((p) => `
+    <div class="lim-row">
+      <span class="lim-name">${escapeHtml(store.platformLabel(p))}</span>
+      <input type="number" min="0" max="100" step="5" data-limit="${p}" value="${limits[p] ?? 100}">
+      <span class="lim-unit">/ 100</span>
+    </div>`).join("");
+}
+
 async function load() {
   const s = await store.getSettings();
   renderSources(s.sources);
+  renderLimits(s.firstRunLimits);
   const mins = Math.max(1, s.intervalMinutes || 180);
   if (mins % 1440 === 0) {
     $("intervalValue").value = mins / 1440;
@@ -65,6 +76,13 @@ $("btn-save").addEventListener("click", async () => {
     sources[cb.dataset.source] = cb.checked;
   });
   s.sources = sources;
+
+  const limits = {};
+  document.querySelectorAll("#limits input[data-limit]").forEach((inp) => {
+    const v = parseInt(inp.value, 10);
+    limits[inp.dataset.limit] = Math.max(0, Math.min(100, Number.isFinite(v) ? v : 100));
+  });
+  s.firstRunLimits = limits;
   const raw = parseFloat($("intervalValue").value);
   const unit = parseInt($("intervalUnit").value, 10) || 60;
   let mins = Number.isFinite(raw) && raw > 0 ? raw * unit : 180;
@@ -84,6 +102,10 @@ $("btn-clear").addEventListener("click", async () => {
   if (!confirm(t("confirmClear"))) return;
   await chrome.runtime.sendMessage({ type: "CLEAR_ALL" });
   showMsg(t("msgCleared"), true);
+});
+
+$("btn-onboarding").addEventListener("click", () => {
+  chrome.runtime.sendMessage({ type: "OPEN_ONBOARDING" });
 });
 
 load();

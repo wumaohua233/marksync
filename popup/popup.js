@@ -388,8 +388,20 @@ async function renderUpdateBar() {
 }
 
 let wasRunning = false;
-renderUpdateBar();
-refresh().then((running) => { wasRunning = running; });
+
+// 还没走过新手引导 → 直接开引导页，弹窗自己关掉。
+// 引导必须在新标签页里跑（用户要去别的标签页登录平台，弹窗会被点关），
+// 所以这里只负责跳转。
+(async () => {
+  const s = await store.getSettings();
+  if (s.onboarded) {
+    renderUpdateBar();
+    refresh().then((running) => { wasRunning = running; });
+    return;
+  }
+  await chrome.runtime.sendMessage({ type: "OPEN_ONBOARDING" });
+  window.close();
+})();
 
 // 轮询：同步中刷新列表显示进度；同步完成后只刷状态栏，避免反复重绘列表导致图片闪烁
 const poll = setInterval(async () => {

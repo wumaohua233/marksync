@@ -8,12 +8,14 @@ import { t, UI_LANG } from "./lib/i18n.js";
 const ALARM_NAME = "shouchang-check";
 const NET_RETRY_ALARM = "shouchang-netretry"; // 网络没就绪时的重试闹钟
 
-// 首次同步每个源最多放进清单的条数。
+// 首跑每个源最多放进清单的条数——**兵底值**。
+// 实际阀值来自 settings.firstRunLimits[平台]（新手引导里可调，上限 100），
+// 这里只在设置缺失时兜底。
 //
-// 「存量」是旧账，不是「新来的」。全量灌进去的后果：角标变成几千、
+// 为什么要限制：「存量」是旧账，不是「新来的」。全量灌进去的后果：角标变成几千、
 // 通知弹「有 3847 条新收藏」、清单长到没法看——这个工具的卖点是
 // 「从安装起不再让新收藏吃灰」，第一次就把历史摊开等于没有重点。
-const FIRST_RUN_KEEP = 30;
+const FIRST_RUN_KEEP = 100;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 let running = false;
@@ -640,30 +642,33 @@ async function getCookieValue(url, name) {
 
 // 仅检测「已启用」的平台。返回 { xhs?: boolean, douyin?: boolean }，
 // 缺省某平台表示它未启用、无需提示登录。
-async function checkLogins() {
+async function checkLogins(all = false) {
   const settings = await store.getSettings();
   const on = Object.keys(settings.sources).filter((s) => settings.sources[s]);
+  // all=true 时无视启用状态全查——新手引导要让用户看到全部 6 个平台的登录状态，
+  // 而弹窗只关心「已启用但没登录」的，多查反而会弹没必要的登录提示。
+  const want = (prefix) => all || on.some((s) => s.startsWith(prefix));
   const out = {};
-  if (on.some((s) => s.startsWith("xhs"))) {
+  if (want("xhs")) {
     out.xhs = !!(await getCookieValue("https://www.xiaohongshu.com", "web_session"));
   }
-  if (on.some((s) => s.startsWith("dy"))) {
+  if (want("dy")) {
     const [a, b] = await Promise.all([
       getCookieValue("https://www.douyin.com", "sessionid_ss"),
       getCookieValue("https://www.douyin.com", "sessionid"),
     ]);
     out.douyin = !!(a || b);
   }
-  if (on.some((s) => s.startsWith("yt"))) {
+  if (want("yt")) {
     out.youtube = !!(await getCookieValue("https://www.youtube.com", "LOGIN_INFO"));
   }
-  if (on.some((s) => s.startsWith("x_"))) {
+  if (want("x_")) {
     out.x = !!(await getCookieValue("https://x.com", "auth_token"));
   }
-  if (on.some((s) => s.startsWith("tt_"))) {
+  if (want("tt_")) {
     out.tiktok = !!(await getCookieValue("https://www.tiktok.com", "sessionid"));
   }
-  if (on.some((s) => s.startsWith("ig_"))) {
+  if (want("ig_")) {
     out.instagram = !!(await getCookieValue("https://www.instagram.com", "sessionid"));
   }
   return out;
@@ -815,15 +820,18 @@ async function runCheck(trigger, onlyPlatform) {
         source,
         items.map((it) => it.id)
       );
-      // 首跑：只入最近 FIRST_RUN_KEEP 条，且标成**已读** —— 角标从 0 开始，不弹通知。
+      // 首跑：只入最近 N 条（N = 该平台的 firstRunLimits，引导里可调，0 = 不拉历史），
+      // 且标成**已读** —— 角标从 0 开始，不弹通知。
       // 之后：只入真正新增的，标 new，参与角标与通知。
-      const toStore = isFirstRun ? items.slice(0, FIRST_RUN_KEEP) : fresh;
+      const platform = store.SOURCES[source].platform;
+      const keep = settings.firstRunLimits?.[platform] ?? FIRST_RUN_KEEP;
+      const toStore = isFirstRun ? items.slice(0, keep) : fresh;
       const now = Date.now();
       const entries = toStore.map((it, idx) => ({
         ...it,
         key: `${source}:${it.id}`,
         source,
-        platform: store.SOURCES[source].platform,
+        platform,
         status: isFirstRun ? "read" : "new",
         firstSeenAt: now,
         seq: idx, // 抓取列表中的位次（0 = 最新收藏），保留平台的倒序
@@ -879,9 +887,17 @@ async function resetAlarm() {
   });
 }
 
-chrome.runtime.onInstalled.addListener(async () => {
+chrome.runtime.onInstalled.addListener(async (details) => {
   await resetAlarm();
   await refreshBadge();
+  // 全新安装：标记「还没看过引导」并直接开一个标签页。
+  // 升级不触发——老用户不该被重复引导。
+  if (details.reason === "install") {
+    const s = await store.getSettings();
+    s.onboarded = false;
+    await store.saveSettings(s);
+    chrome.tabs.create({ url: chrome.runtime.getURL("onboarding/onboarding.html") });
+  }
 });
 
 chrome.runtime.onStartup.addListener(() => {
@@ -897,6 +913,15 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === "RUN_CHECK_NOW") {
     runCheck("manual", msg.platform).then(sendResponse);
+    return true;
+  }
+  if (msg.type === "CHECK_ALL_LOGINS") {
+    checkLogins(true).then(sendResponse);
+    return true;
+  }
+  if (msg.type === "OPEN_ONBOARDING") {
+    chrome.tabs.create({ url: chrome.runtime.getURL("onboarding/onboarding.html") });
+    sendResponse({ ok: true });
     return true;
   }
   if (msg.type === "GET_STATUS") {

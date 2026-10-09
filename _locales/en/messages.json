@@ -330,5 +330,98 @@
   },
   "updateDismiss": {
     "message": "Skip this version"
+  },
+  "obWelcomeTitle": {
+    "message": "Welcome to MarkSync"
+  },
+  "obWelcomeDesc": {
+    "message": "Everything you save and like across platforms, gathered into one list — so the things you saved for later actually get looked at."
+  },
+  "obWelcomeNote": {
+    "message": "All data stays on this computer. Nothing is uploaded, no account needed."
+  },
+  "obStart": {
+    "message": "Get started"
+  },
+  "obNext": {
+    "message": "Next"
+  },
+  "obBack": {
+    "message": "Back"
+  },
+  "obSkip": {
+    "message": "Skip"
+  },
+  "obPlatformsTitle": {
+    "message": "Sign in to the platforms you want to sync"
+  },
+  "obPlatformsDesc": {
+    "message": "These are the real sign-in states in your browser. MarkSync never touches your password — it just borrows the session you already have to read your own saves."
+  },
+  "obStatusLoggedIn": {
+    "message": "Signed in"
+  },
+  "obStatusNotLoggedIn": {
+    "message": "Not signed in"
+  },
+  "obBtnGoLogin": {
+    "message": "Sign in"
+  },
+  "obBtnRefresh": {
+    "message": "Refresh"
+  },
+  "obSelectedCount": {
+    "message": "$1 platforms selected"
+  },
+  "obNoPlatforms": {
+    "message": "Pick at least one platform"
+  },
+  "obLimitsTitle": {
+    "message": "How much to pull on the first sync"
+  },
+  "obLimitsDesc": {
+    "message": "Each platform contributes only its most recent N items as a starting point. Older history stays out of the list — from then on you are only notified about new saves."
+  },
+  "obLimitValue": {
+    "message": "Latest $1"
+  },
+  "obLimitZero": {
+    "message": "No history — only new saves from now on"
+  },
+  "obLimitFootnote": {
+    "message": "Max 100 per platform. This only applies to the very first sync."
+  },
+  "obDoneTitle": {
+    "message": "All set"
+  },
+  "obDoneDesc": {
+    "message": "$1 platforms selected. Hit the button below to run the first sync."
+  },
+  "obBtnStartSync": {
+    "message": "Start syncing"
+  },
+  "obSyncingTitle": {
+    "message": "Syncing"
+  },
+  "obSyncingDesc": {
+    "message": "Reading your saves across platforms — hang tight…"
+  },
+  "obSyncedTitle": {
+    "message": "Done"
+  },
+  "obSyncedDesc": {
+    "message": "Pulled $1 items as a starting point. You will be notified when something new shows up."
+  },
+  "obBtnFinish": {
+    "message": "Start using it"
+  },
+  "optSecFirstRun": {
+    "message": "First sync amount"
+  },
+  "optFirstRunHint": {
+    "message": "How many recent items each platform contributes on the first sync. Set to 0 to skip history entirely. Applies again after clearing data."
+  },
+  "optBtnOnboarding": {
+    "message": "Reopen the setup guide"
   }
 }

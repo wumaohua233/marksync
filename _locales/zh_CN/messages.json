@@ -330,5 +330,98 @@
   },
   "updateDismiss": {
     "message": "忽略此版本"
+  },
+  "obWelcomeTitle": {
+    "message": "欢迎来到 MarkSync"
+  },
+  "obWelcomeDesc": {
+    "message": "把你在各个平台的收藏和点赞攒成一份清单，专治「刷到就收藏，收藏就吃灰」。"
+  },
+  "obWelcomeNote": {
+    "message": "所有数据只存在你这台电脑上。不上传，不需要注册账号。"
+  },
+  "obStart": {
+    "message": "开始设置"
+  },
+  "obNext": {
+    "message": "下一步"
+  },
+  "obBack": {
+    "message": "上一步"
+  },
+  "obSkip": {
+    "message": "跳过引导"
+  },
+  "obPlatformsTitle": {
+    "message": "登录你要同步的平台"
+  },
+  "obPlatformsDesc": {
+    "message": "下面显示的是你浏览器里真实的登录状态。MarkSync 不会接触你的账号密码，只是借用你已经登录的会话来读你自己的收藏。"
+  },
+  "obStatusLoggedIn": {
+    "message": "已登录"
+  },
+  "obStatusNotLoggedIn": {
+    "message": "未登录"
+  },
+  "obBtnGoLogin": {
+    "message": "去登录"
+  },
+  "obBtnRefresh": {
+    "message": "刷新状态"
+  },
+  "obSelectedCount": {
+    "message": "已选 $1 个平台"
+  },
+  "obNoPlatforms": {
+    "message": "至少选择一个平台"
+  },
+  "obLimitsTitle": {
+    "message": "首次同步拉多少条"
+  },
+  "obLimitsDesc": {
+    "message": "每个平台只取最近的 N 条作为起点，更早的历史不会进清单。之后只提醒新增，不会再打扰你。"
+  },
+  "obLimitValue": {
+    "message": "最近 $1 条"
+  },
+  "obLimitZero": {
+    "message": "不拉历史，只提醒今后的新增"
+  },
+  "obLimitFootnote": {
+    "message": "上限 100 条。这个设置只对第一次同步生效。"
+  },
+  "obDoneTitle": {
+    "message": "准备好了"
+  },
+  "obDoneDesc": {
+    "message": "已选择 $1 个平台。点下面的按钮开始第一次同步。"
+  },
+  "obBtnStartSync": {
+    "message": "开始同步"
+  },
+  "obSyncingTitle": {
+    "message": "正在同步"
+  },
+  "obSyncingDesc": {
+    "message": "正在读取你在各平台的收藏，请稍候…"
+  },
+  "obSyncedTitle": {
+    "message": "同步完成"
+  },
+  "obSyncedDesc": {
+    "message": "拉取了 $1 条作为起点。以后有新收藏时会提醒你。"
+  },
+  "obBtnFinish": {
+    "message": "开始使用"
+  },
+  "optSecFirstRun": {
+    "message": "首次同步条数"
+  },
+  "optFirstRunHint": {
+    "message": "每个平台最多拉最近多少条作为起点。设为 0 表示完全不拉历史。清空数据重新导入时会再次生效。"
+  },
+  "optBtnOnboarding": {
+    "message": "重新打开新手引导"
   }
 }

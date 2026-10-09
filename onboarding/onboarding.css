@@ -1,0 +1,357 @@
+/* MarkSync 新手引导 —— Liquid Glass 视觉
+ *
+ * 参考 iOS 26 的液态玻璃：半透明材质 + 强背景模糊与饱和、边缘高光、
+ * 多层投影制造厚度感，配合带回弹的弹簧动画。
+ *
+ * 几个关键点：
+ *   1. backdrop-filter 的 saturate() 比 blur() 更决定"玻璃感"——只模糊不饱和会发灰
+ *   2. 玻璃的边缘必须有高光（顶部亮、底部暗），否则只是一块半透明色块
+ *   3. 动效统一走弹簧曲线，不用 ease —— ease 看起来"软件感"，弹簧才像实体
+ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --brand: #FF2442;
+  --ink: #14161c;
+  --ink-2: #5b6271;
+  --ink-3: #8e95a3;
+
+  /* 玻璃材质。
+     卡片刻意做得**很透**（.34）：玻璃感来自「背后的颜色被模糊后透上来」，
+     不透明度过高就只剩一块白板。内侧高光的白色叠层负责把文字托住。 */
+  --glass-bg: rgba(255, 255, 255, .34);
+  --glass-brd: rgba(255, 255, 255, .78);
+  --glass-inner: rgba(255, 255, 255, .5);
+  --glass-shadow: 0 28px 70px -20px rgba(28, 32, 58, .34), 0 6px 18px -8px rgba(28, 32, 58, .16);
+  --blur: blur(52px) saturate(200%);
+
+  --spring: cubic-bezier(.34, 1.4, .5, 1);
+  --spring-soft: cubic-bezier(.32, .72, 0, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #f5f5f7;
+    --ink-2: #a1a1a6;
+    --ink-3: #6e6e73;
+    --glass-bg: rgba(255, 255, 255, .07);
+    --glass-brd: rgba(255, 255, 255, .14);
+    --glass-inner: rgba(255, 255, 255, .06);
+    --glass-shadow: 0 28px 70px -20px rgba(0, 0, 0, .7), 0 6px 18px -8px rgba(0, 0, 0, .5);
+  }
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+               "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ── 背景：渐变 + 漂浮色斑 ───────────────────────────────── */
+.stage {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 28px;
+  /* 背景必须够彩，否则卡片的 backdrop-filter 没东西可模糊，白搭 */
+  background: linear-gradient(150deg, #c9d8ff 0%, #f3d9ff 32%, #ffd9e8 58%, #c6f2e4 100%);
+}
+@media (prefers-color-scheme: dark) {
+  .stage { background: linear-gradient(150deg, #131a3a 0%, #2a1338 38%, #3a1226 62%, #07302c 100%); }
+}
+
+.blobs { position: absolute; inset: 0; overflow: hidden; filter: blur(58px); }
+.blob {
+  position: absolute; width: 52vmax; height: 52vmax; border-radius: 50%;
+  opacity: .62; will-change: transform;
+}
+.b1 { background: radial-gradient(circle, #6366f1 0%, rgba(99,102,241,0) 68%); top: -18%; left: -14%; animation: drift1 26s var(--spring-soft) infinite; }
+.b2 { background: radial-gradient(circle, #ec4899 0%, rgba(236,72,153,0) 68%); bottom: -22%; right: -12%; animation: drift2 31s var(--spring-soft) infinite; }
+.b3 { background: radial-gradient(circle, #0ea5a4 0%, rgba(14,165,164,0) 68%); top: 20%; right: 2%;   animation: drift3 37s var(--spring-soft) infinite; }
+.b4 { background: radial-gradient(circle, #f59e0b 0%, rgba(245,158,11,0) 68%); bottom: 2%; left: -2%;  animation: drift1 40s var(--spring-soft) infinite reverse; }
+@media (prefers-color-scheme: dark) { .blob { opacity: .48; } }
+
+@keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(9%, 7%) scale(1.14); } }
+@keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1.06); } 50% { transform: translate(-11%, -8%) scale(.94); } }
+@keyframes drift3 { 0%,100% { transform: translate(0,0) scale(.96); } 50% { transform: translate(-7%, 10%) scale(1.12); } }
+
+/* ── 玻璃卡片 ───────────────────────────────────────────── */
+.card {
+  position: relative;
+  width: min(660px, 100%);
+  height: min(620px, calc(100vh - 56px));
+  display: flex; flex-direction: column;
+  border-radius: 34px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-brd);
+  box-shadow: var(--glass-shadow), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(0,0,0,.05),
+              inset 1px 0 0 rgba(255,255,255,.5), inset -1px 0 0 rgba(255,255,255,.5);
+  overflow: hidden;
+  animation: cardIn .85s var(--spring) both;
+}
+/* 斜向镜面高光：玻璃"反光"的来源，少了它整块会显得平 */
+.card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(138deg, rgba(255,255,255,.6) 0%, rgba(255,255,255,.1) 30%, transparent 52%);
+}
+@media (prefers-color-scheme: dark) {
+  .card::before { background: linear-gradient(138deg, rgba(255,255,255,.14) 0%, transparent 46%); }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(26px) scale(.955); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── 头部 ───────────────────────────────────────────────── */
+.head {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 30px 8px;
+}
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 650; font-size: 15px; letter-spacing: .2px; }
+.brand .mark {
+  width: 26px; height: 26px; border-radius: 9px; display: grid; place-items: center;
+  background: linear-gradient(150deg, var(--brand), #ff6b81);
+  box-shadow: 0 4px 12px -3px rgba(255,36,66,.55), inset 0 1px 0 rgba(255,255,255,.4);
+  font-size: 13px;
+}
+
+.dots { display: flex; align-items: center; gap: 7px; }
+.dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--ink-3); opacity: .38;
+  transition: all .5s var(--spring);
+}
+.dot.on { opacity: 1; width: 22px; border-radius: 4px; background: var(--brand); }
+.dot.done { opacity: .75; background: var(--ink-2); }
+
+/* ── 内容区：绝对定位叠放，切换时只动 transform / opacity ── */
+.body { position: relative; z-index: 2; flex: 1; overflow: hidden; }
+
+.step {
+  position: absolute; inset: 0;
+  padding: 14px 30px 0;
+  overflow-y: auto; overflow-x: hidden;
+  opacity: 0; pointer-events: none;
+  transform: translateX(34px) scale(.97);
+  transition: opacity .42s var(--spring-soft), transform .55s var(--spring);
+  will-change: transform, opacity;
+}
+.step.active { opacity: 1; pointer-events: auto; transform: none; }
+.step.left   { transform: translateX(-34px) scale(.97); }
+
+.step h2 { font-size: 27px; font-weight: 700; letter-spacing: -.4px; line-height: 1.25; }
+.step .desc { margin-top: 10px; font-size: 14.5px; line-height: 1.65; color: var(--ink-2); }
+.step .desc b { color: var(--ink); font-weight: 600; }
+
+/* ── 底部按钮 ───────────────────────────────────────────── */
+.foot {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 14px 30px 24px;
+}
+.btn {
+  font: inherit; font-size: 15px; font-weight: 600;
+  border-radius: 16px; padding: 13px 26px; cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform .3s var(--spring), box-shadow .3s var(--spring),
+              background .2s, opacity .2s, filter .2s;
+}
+.btn:active { transform: scale(.955); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn.primary {
+  color: #fff; margin-left: auto;
+  background: linear-gradient(160deg, #ff3b57, var(--brand) 70%);
+  box-shadow: 0 10px 24px -8px rgba(255,36,66,.62), inset 0 1px 0 rgba(255,255,255,.34);
+}
+.btn.primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 14px 30px -8px rgba(255,36,66,.7), inset 0 1px 0 rgba(255,255,255,.34); }
+
+.btn.ghost {
+  color: var(--ink-2); background: var(--glass-inner);
+  border-color: var(--glass-brd);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+}
+.btn.ghost:hover { color: var(--ink); }
+.btn.ghost[hidden] { display: none; }
+
+.btn.text { background: none; color: var(--ink-3); padding: 13px 10px; font-weight: 500; }
+.btn.text:hover { color: var(--ink-2); }
+
+/* ── 第 1 步：欢迎 ──────────────────────────────────────── */
+.hero { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding-bottom: 24px; }
+.hero .glyph {
+  width: 86px; height: 86px; border-radius: 28px; display: grid; place-items: center;
+  font-size: 40px;
+  background: linear-gradient(150deg, rgba(255,255,255,.9), rgba(255,255,255,.45));
+  border: 1px solid var(--glass-brd);
+  box-shadow: 0 18px 40px -14px rgba(255,36,66,.42), inset 0 1px 0 rgba(255,255,255,.9);
+  animation: glyphIn 1s var(--spring) both .12s;
+}
+@keyframes glyphIn { from { opacity: 0; transform: scale(.6) rotate(-14deg); } to { opacity: 1; transform: none; } }
+.hero h2 { margin-top: 22px; font-size: 31px; animation: riseIn .7s var(--spring) both .22s; }
+.hero .desc { max-width: 430px; margin-top: 14px; font-size: 15px; animation: riseIn .7s var(--spring) both .32s; }
+.hero .note {
+  margin-top: 26px; font-size: 12.5px; color: var(--ink-3);
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 15px; border-radius: 999px;
+  background: var(--glass-inner); border: 1px solid var(--glass-brd);
+  animation: riseIn .7s var(--spring) both .42s;
+}
+@keyframes riseIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+/* ── 第 2 步：平台网格 ─────────────────────────────────── */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-top: 20px; padding-bottom: 6px; }
+
+.plat {
+  position: relative;
+  display: flex; flex-direction: column; gap: 9px;
+  padding: 14px 15px; border-radius: 19px;
+  background: var(--glass-inner);
+  border: 1px solid var(--glass-brd);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 1px 2px rgba(28,32,58,.04);
+  transition: transform .35s var(--spring), box-shadow .35s var(--spring),
+              background .3s, border-color .3s, opacity .3s;
+}
+.plat.off { opacity: .48; }
+.plat:hover { transform: translateY(-2px); box-shadow: 0 12px 26px -12px rgba(31,41,55,.3), inset 0 1px 0 rgba(255,255,255,.6); }
+
+.p-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.p-name { font-size: 14.5px; font-weight: 600; letter-spacing: .1px; }
+
+/* iOS 风格开关 */
+.sw { position: relative; flex-shrink: 0; width: 42px; height: 25px; }
+.sw input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 2; }
+.sw .track {
+  position: absolute; inset: 0; border-radius: 999px;
+  background: rgba(120,120,128,.28);
+  transition: background .32s var(--spring-soft);
+}
+.sw .track::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 21px; height: 21px;
+  border-radius: 50%; background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.22);
+  transition: transform .36s var(--spring);
+}
+.sw input:checked + .track { background: linear-gradient(160deg, #34d399, #10b981); }
+.sw input:checked + .track::after { transform: translateX(17px); }
+.sw input:focus-visible + .track { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+.p-bot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 24px; }
+.p-status { font-size: 12px; color: var(--ink-3); display: inline-flex; align-items: center; gap: 5px; }
+.p-status::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink-3); opacity: .5; transition: background .3s, box-shadow .3s;
+}
+.p-status.ok { color: #10b981; }
+.p-status.ok::before { background: #10b981; opacity: 1; box-shadow: 0 0 0 3px rgba(16,185,129,.16); }
+.p-status.unknown::before { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: .3; } 50% { opacity: .9; } }
+
+.p-login {
+  font: inherit; font-size: 12px; font-weight: 600; color: var(--brand);
+  background: rgba(255,36,66,.09); border: 1px solid rgba(255,36,66,.22);
+  border-radius: 999px; padding: 4px 12px; cursor: pointer;
+  transition: transform .3s var(--spring), background .2s;
+}
+.p-login:hover { background: rgba(255,36,66,.16); }
+.p-login:active { transform: scale(.94); }
+.p-login[hidden] { display: none; }
+
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; gap: 10px; }
+.count { font-size: 12.5px; color: var(--ink-3); transition: color .3s; }
+.count.warn { color: #f59e0b; font-weight: 600; }
+.mini {
+  font: inherit; font-size: 12.5px; font-weight: 600; color: var(--ink-2);
+  background: var(--glass-inner); border: 1px solid var(--glass-brd);
+  border-radius: 999px; padding: 6px 14px; cursor: pointer;
+  transition: transform .3s var(--spring), color .2s;
+}
+.mini:hover { color: var(--ink); }
+.mini:active { transform: scale(.94); }
+.mini.spin { animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 未选平台时的抖动提示 */
+.shake { animation: shake .45s cubic-bezier(.36,.07,.19,.97); }
+@keyframes shake { 10%,90% { transform: translateX(-2px); } 20%,80% { transform: translateX(4px); } 30%,50%,70% { transform: translateX(-6px); } 40%,60% { transform: translateX(6px); } }
+
+/* ── 第 3 步：条数 ─────────────────────────────────────── */
+/* 6 个平台单列排会溢出（实测 584px vs 可视 477px），所以走两列网格：
+   660px 宽的卡片每列还有 ~300px，滑块完全够用，高度直接砍半。 */
+.lims { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; padding-bottom: 4px; }
+.lim {
+  padding: 10px 15px 11px; border-radius: 16px;
+  background: var(--glass-inner); border: 1px solid var(--glass-brd);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 1px 2px rgba(28,32,58,.04);
+}
+.l-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
+.l-name { font-size: 13.5px; font-weight: 600; }
+.l-val { font-size: 12.5px; color: var(--brand); font-weight: 600; font-variant-numeric: tabular-nums; }
+.l-val.zero { color: var(--ink-3); font-weight: 500; }
+
+/* iOS 风格滑块 */
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  /* 滑块轨道只有 4px，但滑块头 22px——靠上下 margin 给滑块头留出溢出空间，
+     否则它会压在相邻元素上。 */
+  margin: 9px 0;
+  width: 100%; height: 4px; border-radius: 4px; outline: none; cursor: pointer;
+  background: rgba(120,120,128,.24);
+  --fill: 100%;
+  background-image: linear-gradient(90deg, var(--brand), #ff6b81);
+  background-size: var(--fill) 100%;
+  background-repeat: no-repeat;
+  transition: background-size .18s var(--spring-soft);
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; cursor: grab;
+  box-shadow: 0 2px 8px rgba(0,0,0,.26), 0 0 0 .5px rgba(0,0,0,.06);
+  transition: transform .25s var(--spring), box-shadow .25s var(--spring);
+}
+input[type=range]:active::-webkit-slider-thumb { cursor: grabbing; transform: scale(1.22); box-shadow: 0 4px 14px rgba(0,0,0,.3), 0 0 0 7px rgba(255,36,66,.12); }
+input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 2px 8px rgba(0,0,0,.26), 0 0 0 4px rgba(255,36,66,.3); }
+
+.footnote { margin-top: 10px; font-size: 11.5px; color: var(--ink-3); line-height: 1.55; }
+
+/* ── 第 4 步：完成 / 同步中 ─────────────────────────────── */
+.finish { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding-bottom: 24px; }
+.ring { position: relative; width: 104px; height: 104px; display: grid; place-items: center; }
+.ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
+.ring .trk { stroke: rgba(120,120,128,.2); }
+.ring .bar { stroke: var(--brand); stroke-dasharray: 283; stroke-dashoffset: 283; transition: stroke-dashoffset .6s var(--spring-soft); }
+.ring .icon { font-size: 34px; }
+/* 勾的路径长度约 54（18.4 + 35.4），dasharray 必须不小于它，否则画出半截 */
+.ring .check { stroke: var(--brand); stroke-width: 5.5; stroke-linecap: round; stroke-linejoin: round; fill: none;
+               stroke-dasharray: 58; stroke-dashoffset: 58; }
+.ring.ok .check { animation: draw .55s var(--spring-soft) .12s forwards; }
+.ring.ok .icon { opacity: 0; transform: scale(.6); transition: opacity .25s, transform .35s var(--spring); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.ring.busy .icon { animation: breathe 1.7s ease-in-out infinite; }
+@keyframes breathe { 0%,100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.14); opacity: 1; } }
+
+.finish h2 { margin-top: 20px; font-size: 28px; }
+.finish .desc { max-width: 400px; margin-top: 12px; }
+
+@media (max-width: 620px) {
+  .stage { padding: 0; }
+  .card { height: 100vh; width: 100%; border-radius: 0; border: none; }
+  .head, .foot { padding-left: 20px; padding-right: 20px; }
+  .step { padding-left: 20px; padding-right: 20px; }
+  .grid { grid-template-columns: 1fr; }
+  .lims { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

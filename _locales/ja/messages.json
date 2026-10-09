@@ -330,5 +330,98 @@
   },
   "updateDismiss": {
     "message": "このバージョンをスキップ"
+  },
+  "obWelcomeTitle": {
+    "message": "MarkSync へようこそ"
+  },
+  "obWelcomeDesc": {
+    "message": "各プラットフォームの保存といいねをひとつのリストに。あとで見るつもりが溜まったまま、を解消します。"
+  },
+  "obWelcomeNote": {
+    "message": "データはすべてこのパソコンの中だけ。送信もアカウント登録もありません。"
+  },
+  "obStart": {
+    "message": "はじめる"
+  },
+  "obNext": {
+    "message": "次へ"
+  },
+  "obBack": {
+    "message": "戻る"
+  },
+  "obSkip": {
+    "message": "スキップ"
+  },
+  "obPlatformsTitle": {
+    "message": "同期したいプラットフォームにログイン"
+  },
+  "obPlatformsDesc": {
+    "message": "表示されているのは、あなたのブラウザでの実際のログイン状態です。MarkSync はパスワードには触れません。すでにログイン済みのセッションを借りて、あなた自身の保存を読むだけです。"
+  },
+  "obStatusLoggedIn": {
+    "message": "ログイン済み"
+  },
+  "obStatusNotLoggedIn": {
+    "message": "未ログイン"
+  },
+  "obBtnGoLogin": {
+    "message": "ログイン"
+  },
+  "obBtnRefresh": {
+    "message": "状態を更新"
+  },
+  "obSelectedCount": {
+    "message": "$1 件選択中"
+  },
+  "obNoPlatforms": {
+    "message": "少なくともひとつ選んでください"
+  },
+  "obLimitsTitle": {
+    "message": "初回同期で取り込む件数"
+  },
+  "obLimitsDesc": {
+    "message": "各プラットフォームから直近の N 件だけを起点として取り込みます。それより古い履歴はリストに入りません。以降は新着だけをお知らせします。"
+  },
+  "obLimitValue": {
+    "message": "直近 $1 件"
+  },
+  "obLimitZero": {
+    "message": "履歴は取り込まず、今後の新着のみ"
+  },
+  "obLimitFootnote": {
+    "message": "上限は各 100 件。この設定は初回同期にだけ効きます。"
+  },
+  "obDoneTitle": {
+    "message": "準備完了"
+  },
+  "obDoneDesc": {
+    "message": "$1 個のプラットフォームを選択しました。下のボタンで初回同期を開始します。"
+  },
+  "obBtnStartSync": {
+    "message": "同期を開始"
+  },
+  "obSyncingTitle": {
+    "message": "同期中"
+  },
+  "obSyncingDesc": {
+    "message": "各プラットフォームの保存を読み込んでいます…"
+  },
+  "obSyncedTitle": {
+    "message": "完了"
+  },
+  "obSyncedDesc": {
+    "message": "$1 件を起点として取り込みました。新しい保存があればお知らせします。"
+  },
+  "obBtnFinish": {
+    "message": "使ってみる"
+  },
+  "optSecFirstRun": {
+    "message": "初回同期の件数"
+  },
+  "optFirstRunHint": {
+    "message": "初回同期で各プラットフォームから取り込む直近の件数。0 にすると履歴を取り込みません。データを消して再取り込みする際に再度適用されます。"
+  },
+  "optBtnOnboarding": {
+    "message": "セットアップガイドを開き直す"
   }
 }

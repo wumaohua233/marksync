@@ -17,7 +17,7 @@ STAGE="dist/${NAME}"
 OUT="marksync-v${VERSION}.zip"
 
 # manifest.json 里实际引用到的资源目录
-INCLUDE=(manifest.json background.js lib content popup options icons _locales)
+INCLUDE=(manifest.json background.js lib content popup options onboarding icons _locales)
 # GPL-3.0 要求分发时附带许可证
 EXTRA=(LICENSE)
 

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title data-i18n="obWelcomeTitle">欢迎来到 MarkSync</title>
+<link rel="stylesheet" href="onboarding.css">
+</head>
+<body>
+<div class="stage">
+  <div class="blobs">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="blob b4"></div>
+  </div>
+
+  <main class="card">
+    <header class="head">
+      <div class="brand"><span class="mark">📌</span><span>MarkSync</span></div>
+      <div class="dots" id="dots"></div>
+    </header>
+
+    <div class="body" id="body">
+
+      <!-- ① 欢迎 -->
+      <section class="step" data-step="0">
+        <div class="hero">
+          <div class="glyph">📌</div>
+          <h2 data-i18n="obWelcomeTitle">欢迎来到 MarkSync</h2>
+          <p class="desc" data-i18n="obWelcomeDesc"></p>
+          <span class="note">🔒 <span data-i18n="obWelcomeNote"></span></span>
+        </div>
+      </section>
+
+      <!-- ② 平台与登录 -->
+      <section class="step" data-step="1">
+        <h2 data-i18n="obPlatformsTitle">登录你要同步的平台</h2>
+        <p class="desc" data-i18n="obPlatformsDesc"></p>
+        <div class="grid" id="plats"></div>
+        <div class="toolbar">
+          <span class="count" id="count"></span>
+          <button class="mini" id="refresh" type="button">
+            <span data-i18n="obBtnRefresh">刷新状态</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ③ 每平台条数 -->
+      <section class="step" data-step="2">
+        <h2 data-i18n="obLimitsTitle">首次同步拉多少条</h2>
+        <p class="desc" data-i18n="obLimitsDesc"></p>
+        <div class="lims" id="lims"></div>
+        <p class="footnote" data-i18n="obLimitFootnote"></p>
+      </section>
+
+      <!-- ④ 完成 / 同步中 -->
+      <section class="step" data-step="3">
+        <div class="finish">
+          <div class="ring" id="ring">
+            <svg viewBox="0 0 104 104" aria-hidden="true">
+              <circle class="trk" cx="52" cy="52" r="45"></circle>
+              <circle class="bar" cx="52" cy="52" r="45"></circle>
+              <path class="check" d="M34 53 L47 66 L71 40"></path>
+            </svg>
+            <span class="icon">📌</span>
+          </div>
+          <h2 id="finTitle"></h2>
+          <p class="desc" id="finDesc"></p>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="foot">
+      <button class="btn ghost" id="back" type="button" data-i18n="obBack" hidden></button>
+      <button class="btn text" id="skip" type="button" data-i18n="obSkip"></button>
+      <button class="btn primary" id="next" type="button" data-i18n="obNext"></button>
+    </footer>
+  </main>
+</div>
+<script type="module" src="onboarding.js"></script>
+</body>
+</html>

@@ -71,7 +71,7 @@ jobs:
           # --pack-extension 只校验 default_locale 那一份，所以要逐个语言都试
           for loc in zh_CN en ja; do
             d=$(mktemp -d)
-            cp -R manifest.json background.js lib content popup options icons _locales LICENSE "$d/"
+            cp -R manifest.json background.js lib content popup options onboarding icons _locales LICENSE "$d/"
             # 必须写成单行：run: | 块标量里任何顶格的内容都会截断 YAML 块（踩过）
             python3 -c "import json; p='$d/manifest.json'; m=json.load(open(p,encoding='utf-8')); m['default_locale']='$loc'; json.dump(m,open(p,'w',encoding='utf-8'),ensure_ascii=False,indent=2)"
             out=$("$CHROME" --pack-extension="$d" 2>&1 | grep -i ERROR || true)
