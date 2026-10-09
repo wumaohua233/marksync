@@ -21,6 +21,13 @@ const TAB_KEYS = [
   "xhs_like", "xhs_fav",
 ];
 let activeTab = "recent";
+let settings = null;   // 在 init 里加载，标签栏和平台菜单都要按它过滤
+
+// 只展示用户真正启用的数据源。
+// 设置里关掉的平台，在弹窗里留个标签页只会挤占横向空间，点进去还是空的。
+function visibleTabs() {
+  return TAB_KEYS.filter((k) => k === "recent" || settings?.sources?.[k]);
+}
 
 function filterByTab(arr) {
   if (activeTab === "recent") {
@@ -39,7 +46,7 @@ function renderTabs(items) {
     if (it.firstSeenAt >= cutoff) counts.recent++;
     counts[it.source] = (counts[it.source] || 0) + 1;
   }
-  $("tabs").innerHTML = TAB_KEYS.map((key) => {
+  $("tabs").innerHTML = visibleTabs().map((key) => {
     const n = counts[key] || 0;
     const label = key === "recent" ? t("tabRecent") : store.sourceLabel(key);
     return (
@@ -47,6 +54,7 @@ function renderTabs(items) {
       `${escapeHtml(label)}${n > 0 ? `<span class="cnt">${n}</span>` : ""}</button>`
     );
   }).join("");
+  if (!visibleTabs().includes(activeTab)) activeTab = "recent";
   $("tabs").querySelectorAll(".tab").forEach((el) => {
     el.addEventListener("click", () => {
       activeTab = el.dataset.tab;
@@ -86,10 +94,7 @@ function renderStatus(status) {
   const nextStr = status.nextRun ? escapeHtml(t("statusNextRun", fmtSmart(status.nextRun))) : "";
   const errStr = errs.length ? ` · ${errs.join(" · ")}` : "";
   const okStr = errs.length ? "" : escapeHtml(t("statusAllOk"));
-  // 首次同步只建立基线：清单里那批是标了「已读」的存量，不解释一句用户会困惑
-  const firstStr = r.firstRun ? `<div class="first-run">${escapeHtml(t("firstRunNote"))}</div>` : "";
-  el.innerHTML =
-    escapeHtml(t("statusLastCheck", fmtSmart(r.at))) + nextStr + (errStr || okStr) + firstStr;
+  el.innerHTML = escapeHtml(t("statusLastCheck", fmtSmart(r.at))) + nextStr + (errStr || okStr);
 
   el.querySelectorAll(".login-inline").forEach((btn) => {
     btn.addEventListener("click", (e) => {
@@ -267,7 +272,9 @@ $("btn-run").addEventListener("click", () => startSync());
 // 下拉箭头里按平台去重生成「同步 X」选项，点了只同步那个平台
 function renderSyncMenu() {
   const menu = $("sync-menu");
-  menu.innerHTML = store.platforms()
+  // 没启用的平台点了也同步不出东西，别列出来让人白点
+  const on = store.platforms().filter((p) => store.sourcesOf(p).some((x) => settings?.sources?.[x]));
+  menu.innerHTML = on
     .map(
       (p) =>
         `<button data-platform="${p}"><span class="p-name">${escapeHtml(
@@ -282,8 +289,6 @@ function renderSyncMenu() {
     });
   });
 }
-renderSyncMenu();
-
 // 菜单里每个平台的“上次同步”小时间。日期和时间分色，Intl 已按语言给出正确写法，
 // 这里只负责上色（中/日 → 7月12日，英 → Jul 12）。
 function fmtTimeHtml(ts) {
@@ -393,14 +398,15 @@ let wasRunning = false;
 // 引导必须在新标签页里跑（用户要去别的标签页登录平台，弹窗会被点关），
 // 所以这里只负责跳转。
 (async () => {
-  const s = await store.getSettings();
-  if (s.onboarded) {
-    renderUpdateBar();
-    refresh().then((running) => { wasRunning = running; });
+  settings = await store.getSettings();
+  if (!settings.onboarded) {
+    await chrome.runtime.sendMessage({ type: "OPEN_ONBOARDING" });
+    window.close();
     return;
   }
-  await chrome.runtime.sendMessage({ type: "OPEN_ONBOARDING" });
-  window.close();
+  renderSyncMenu();   // 依赖 settings，所以放在这里而不是模块顶层
+  renderUpdateBar();
+  refresh().then((running) => { wasRunning = running; });
 })();
 
 // 轮询：同步中刷新列表显示进度；同步完成后只刷状态栏，避免反复重绘列表导致图片闪烁

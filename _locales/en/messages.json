@@ -133,9 +133,6 @@
   "statusNeverRun": {
     "message": "Never checked yet. Hit Sync to start."
   },
-  "firstRunNote": {
-    "message": "First sync set a baseline — your existing backlog wasn't dumped into the list. Only new saves from now on show up here."
-  },
   "statusLastCheck": {
     "message": "Last check $1"
   },

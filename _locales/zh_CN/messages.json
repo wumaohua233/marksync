@@ -133,9 +133,6 @@
   "statusNeverRun": {
     "message": "还没有检测过，点击「同步」开始"
   },
-  "firstRunNote": {
-    "message": "首次同步已建立基线：各平台的历史收藏不会灌进清单，只留最近 30 条作起点。之后的新增才会进来。"
-  },
   "statusLastCheck": {
     "message": "上次检测 $1"
   },

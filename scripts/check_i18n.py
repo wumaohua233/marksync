@@ -167,7 +167,13 @@ def main():
         + ["manifest.json"]
     )
     for f in scan:
-        if f.startswith("docs" + os.sep) or "node_modules" in f:
+        # dist/ 是上一轮 pack.sh 的产物，内容滞后一轮，扫它只会误报
+        if (
+            f.startswith("docs" + os.sep)
+            or f.startswith("dist" + os.sep)
+            or (os.sep + "dist" + os.sep) in f
+            or "node_modules" in f
+        ):
             continue
         s = strip_comments(io.open(f, encoding="utf-8").read())
         for rx in (RE_CALL, RE_ATTR, RE_MSG):
