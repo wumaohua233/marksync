@@ -9,13 +9,13 @@ const ALARM_NAME = "shouchang-check";
 const NET_RETRY_ALARM = "shouchang-netretry"; // 网络没就绪时的重试闹钟
 
 // 首跑每个源最多放进清单的条数——**兵底值**。
-// 实际阀值来自 settings.firstRunLimits[平台]（新手引导里可调，上限 100），
+// 实际阈值来自 settings.firstRunLimits[平台]（新手引导里可调，上限 100），
 // 这里只在设置缺失时兜底。
 //
 // 为什么要限制：「存量」是旧账，不是「新来的」。全量灌进去的后果：角标变成几千、
 // 通知弹「有 3847 条新收藏」、清单长到没法看——这个工具的卖点是
 // 「从安装起不再让新收藏吃灰」，第一次就把历史摊开等于没有重点。
-const FIRST_RUN_KEEP = 100;
+const FIRST_RUN_KEEP = 10;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 let running = false;

@@ -1,0 +1,186 @@
+/* MarkSync 共用视觉层：Liquid Glass
+ *
+ * 新手引导 / 弹窗 / 设置页三处共用这一份 token 和基础组件，避免各写一套、
+ * 改一次颜色要改三个地方。
+ *
+ * 三个容易做错的点：
+ *   1. backdrop-filter 里的 saturate() 比 blur() 更决定"玻璃感"。只模糊不饱和会发灰。
+ *   2. 玻璃的边缘必须有高光（顶部亮、底部暗），否则只是一块半透明色块。
+ *   3. 动效统一走弹簧曲线，不用 ease —— ease 看起来"软件感"，弹簧才像实体。
+ *
+ * 类名一律 ms- 前缀，不和各页面自己的类冲突。
+ */
+
+:root {
+  --ms-brand: #FF2442;
+  --ms-brand-lt: #ff6b81;
+  --ms-ink: #14161c;
+  --ms-ink-2: #5b6271;
+  --ms-ink-3: #8e95a3;
+
+  /* 玻璃材质。面片刻意做得很透（.34）：
+     玻璃感来自「背后的颜色被模糊后透上来」，不透明度过高就只剩一块白板。 */
+  --ms-glass-bg: rgba(255, 255, 255, .34);
+  --ms-glass-brd: rgba(255, 255, 255, .78);
+  --ms-glass-inner: rgba(255, 255, 255, .5);
+  --ms-glass-shadow: 0 28px 70px -20px rgba(28, 32, 58, .34),
+                     0 6px 18px -8px rgba(28, 32, 58, .16);
+  --ms-blur: blur(52px) saturate(200%);
+
+  --ms-spring: cubic-bezier(.34, 1.4, .5, 1);
+  --ms-spring-soft: cubic-bezier(.32, .72, 0, 1);
+
+  --ms-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+             "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ms-ink: #f5f5f7;
+    --ms-ink-2: #a1a1a6;
+    --ms-ink-3: #6e6e73;
+    --ms-glass-bg: rgba(255, 255, 255, .07);
+    --ms-glass-brd: rgba(255, 255, 255, .14);
+    --ms-glass-inner: rgba(255, 255, 255, .06);
+    --ms-glass-shadow: 0 28px 70px -20px rgba(0, 0, 0, .7),
+                       0 6px 18px -8px rgba(0, 0, 0, .5);
+  }
+}
+
+/* ── 背景 ────────────────────────────────────────────────
+   纯 CSS 的多层 radial-gradient，不用额外的 DOM，也不用 filter: blur()——
+   渐变色标本身就是软的，加 blur 只会白烧 GPU。 */
+.ms-bg {
+  position: fixed; inset: -14%;
+  z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(38% 42% at 20% 16%, rgba(99,102,241,.60) 0%, rgba(99,102,241,0) 64%),
+    radial-gradient(42% 46% at 84% 24%, rgba(236,72,153,.52) 0%, rgba(236,72,153,0) 64%),
+    radial-gradient(40% 42% at 72% 84%, rgba(20,184,166,.48) 0%, rgba(20,184,166,0) 64%),
+    radial-gradient(36% 38% at 18% 80%, rgba(245,158,11,.46) 0%, rgba(245,158,11,0) 64%),
+    linear-gradient(150deg, #dfe7ff 0%, #f6e6ff 32%, #ffe6f0 58%, #dcf5ee 100%);
+  animation: ms-drift 38s var(--ms-spring-soft) infinite alternate;
+}
+/* 弹窗面积小、内容密，背景压淡一点，否则颜色比内容还抢眼 */
+.ms-bg.soft { opacity: .5; }
+@media (prefers-color-scheme: dark) {
+  .ms-bg {
+    background:
+      radial-gradient(38% 42% at 20% 16%, rgba(67,56,202,.55) 0%, rgba(67,56,202,0) 64%),
+      radial-gradient(42% 46% at 84% 24%, rgba(157,23,77,.5) 0%, rgba(157,23,77,0) 64%),
+      radial-gradient(40% 42% at 72% 84%, rgba(15,118,110,.5) 0%, rgba(15,118,110,0) 64%),
+      radial-gradient(36% 38% at 18% 80%, rgba(180,83,9,.45) 0%, rgba(180,83,9,0) 64%),
+      linear-gradient(150deg, #131a3a 0%, #2a1338 38%, #3a1226 62%, #07302c 100%);
+  }
+  .ms-bg.soft { opacity: .75; }
+}
+@keyframes ms-drift {
+  from { transform: translate3d(-1.5%, -1%, 0) scale(1.06); }
+  to   { transform: translate3d(2.5%, 1.5%, 0) scale(1.13); }
+}
+
+/* ── 玻璃面 ────────────────────────────────────────────── */
+.ms-glass {
+  position: relative;
+  background: var(--ms-glass-bg);
+  backdrop-filter: var(--ms-blur);
+  -webkit-backdrop-filter: var(--ms-blur);
+  border: 1px solid var(--ms-glass-brd);
+  box-shadow: var(--ms-glass-shadow),
+              inset 0 1.5px 0 rgba(255,255,255,.95),
+              inset 0 -1px 0 rgba(0,0,0,.05),
+              inset 1px 0 0 rgba(255,255,255,.5),
+              inset -1px 0 0 rgba(255,255,255,.5);
+}
+/* 斜向镜面高光：玻璃"反光"的来源，少了它整块会显得平 */
+.ms-glass::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(138deg, rgba(255,255,255,.6) 0%, rgba(255,255,255,.1) 30%, transparent 52%);
+}
+@media (prefers-color-scheme: dark) {
+  .ms-glass::before { background: linear-gradient(138deg, rgba(255,255,255,.14) 0%, transparent 46%); }
+}
+
+/* 内层小块（卡片里的卡片）：比外层实一点，才看得出层次 */
+.ms-inset {
+  background: var(--ms-glass-inner);
+  border: 1px solid var(--ms-glass-brd);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 1px 2px rgba(28,32,58,.04);
+}
+@media (prefers-color-scheme: dark) {
+  .ms-inset { box-shadow: inset 0 1px 0 rgba(255,255,255,.07); }
+}
+
+/* ── 按钮 ──────────────────────────────────────────────── */
+.ms-btn {
+  font: inherit; font-size: 14px; font-weight: 600;
+  border-radius: 15px; padding: 11px 22px; cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform .3s var(--ms-spring), box-shadow .3s var(--ms-spring),
+              background .2s, color .2s, opacity .2s;
+}
+.ms-btn:active { transform: scale(.955); }
+.ms-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.ms-btn.primary {
+  color: #fff;
+  background: linear-gradient(160deg, #ff3b57, var(--ms-brand) 70%);
+  box-shadow: 0 10px 24px -8px rgba(255,36,66,.62), inset 0 1px 0 rgba(255,255,255,.34);
+}
+.ms-btn.primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px -8px rgba(255,36,66,.7), inset 0 1px 0 rgba(255,255,255,.34);
+}
+
+.ms-btn.ghost {
+  color: var(--ms-ink-2); background: var(--ms-glass-inner);
+  border-color: var(--ms-glass-brd);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
+}
+.ms-btn.ghost:hover:not(:disabled) { color: var(--ms-ink); }
+
+.ms-btn.text { background: none; color: var(--ms-ink-3); font-weight: 500; }
+.ms-btn.text:hover { color: var(--ms-ink-2); }
+
+/* 胶囊小按钮 */
+.ms-chip {
+  font: inherit; font-size: 12px; font-weight: 600;
+  color: var(--ms-brand); background: rgba(255,36,66,.1);
+  border: 1px solid rgba(255,36,66,.24); border-radius: 999px;
+  padding: 4px 12px; cursor: pointer;
+  transition: transform .3s var(--ms-spring), background .2s;
+}
+.ms-chip:hover { background: rgba(255,36,66,.17); }
+.ms-chip:active { transform: scale(.94); }
+
+/* ── iOS 风格开关 ──────────────────────────────────────── */
+.ms-sw { position: relative; flex-shrink: 0; width: 42px; height: 25px; }
+.ms-sw input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 2; }
+.ms-sw .track {
+  position: absolute; inset: 0; border-radius: 999px;
+  background: rgba(120,120,128,.3);
+  transition: background .32s var(--ms-spring-soft);
+}
+.ms-sw .track::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 21px; height: 21px;
+  border-radius: 50%; background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.22);
+  transition: transform .36s var(--ms-spring);
+}
+.ms-sw input:checked + .track::after { transform: translateX(17px); }
+.ms-sw input:checked + .track { background: linear-gradient(160deg, #34d399, #10b981); }
+.ms-sw input:focus-visible + .track { outline: 2px solid var(--ms-brand); outline-offset: 2px; }
+
+/* ── 滚动条 ────────────────────────────────────────────── */
+.ms-scroll { scrollbar-width: thin; scrollbar-color: rgba(120,120,128,.32) transparent; }
+.ms-scroll::-webkit-scrollbar { width: 8px; }
+.ms-scroll::-webkit-scrollbar-thumb {
+  background: rgba(120,120,128,.28); border-radius: 99px;
+  border: 2px solid transparent; background-clip: content-box;
+}
+.ms-scroll::-webkit-scrollbar-thumb:hover { background: rgba(120,120,128,.45); background-clip: content-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ms-bg { animation: none; }
+  .ms-btn, .ms-chip, .ms-sw .track, .ms-sw .track::after { transition-duration: .01ms !important; }
+}

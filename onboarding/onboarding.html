@@ -5,18 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title data-i18n="obWelcomeTitle">欢迎来到 MarkSync</title>
+<link rel="stylesheet" href="../lib/glass.css">
 <link rel="stylesheet" href="onboarding.css">
 </head>
 <body>
 <div class="stage">
-  <div class="blobs">
-    <div class="blob b1"></div>
-    <div class="blob b2"></div>
-    <div class="blob b3"></div>
-    <div class="blob b4"></div>
-  </div>
+  <div class="ms-bg"></div>
 
-  <main class="card">
+  <main class="card ms-glass">
     <header class="head">
       <div class="brand"><img class="mark" src="../icons/128.png" alt=""><span>MarkSync</span></div>
       <div class="dots" id="dots"></div>
@@ -55,13 +51,30 @@
         <p class="footnote" data-i18n="obLimitFootnote"></p>
       </section>
 
-      <!-- ④ 完成 / 同步中 -->
+      <!-- ④ 同步频率 → 执行同步 → 结果 -->
       <section class="step" data-step="3">
-        <div class="finish">
+
+        <!-- 设置态 -->
+        <div id="freq-view">
+          <h2 data-i18n="obFreqTitle">你希望多久同步一次</h2>
+          <p class="desc" data-i18n="obFreqDesc"></p>
+          <div class="freq-wrap">
+            <div class="freq-hl" id="freq-hl"></div>
+            <div id="freq-opts"></div>
+          </div>
+          <p class="footnote" data-i18n="obFreqNote"></p>
+        </div>
+
+        <!-- 同步中 / 结果 -->
+        <div class="finish" id="finish-view" hidden>
           <div class="ring" id="ring">
             <svg viewBox="0 0 104 104" aria-hidden="true">
               <circle class="trk" cx="52" cy="52" r="45"></circle>
-              <circle class="bar" cx="52" cy="52" r="45"></circle>
+              <!-- rotate 只加在进度环这一个圆上。
+                   千万不能写 .ring svg { transform: rotate(-90deg) }——
+                   那会把下面的勾也一起转，顶点从下方跑到右边，勾就变成「›」了。
+                   SVG 圆的虚线起点默认在 3 点方向，旋 -90° 才是从 12 点开始画。 -->
+              <circle class="bar" cx="52" cy="52" r="45" transform="rotate(-90 52 52)"></circle>
               <path class="check" d="M34 53 L47 66 L71 40"></path>
             </svg>
             <span class="icon"><img src="../icons/128.png" alt=""></span>
@@ -74,9 +87,9 @@
     </div>
 
     <footer class="foot">
-      <button class="btn ghost" id="back" type="button" data-i18n="obBack" hidden></button>
-      <button class="btn text" id="skip" type="button" data-i18n="obSkip"></button>
-      <button class="btn primary" id="next" type="button" data-i18n="obNext"></button>
+      <button class="btn ms-btn ghost" id="back" type="button" data-i18n="obBack" hidden></button>
+      <button class="btn ms-btn text" id="skip" type="button" data-i18n="obSkip"></button>
+      <button class="btn ms-btn primary" id="next" type="button" data-i18n="obNext"></button>
     </footer>
   </main>
 </div>

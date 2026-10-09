@@ -391,12 +391,6 @@
   "obLimitFootnote": {
     "message": "Max 100 per platform. This only applies to the very first sync."
   },
-  "obDoneTitle": {
-    "message": "All set"
-  },
-  "obDoneDesc": {
-    "message": "$1 platforms selected. Hit the button below to run the first sync."
-  },
   "obBtnStartSync": {
     "message": "Start syncing"
   },
@@ -423,5 +417,35 @@
   },
   "optBtnOnboarding": {
     "message": "Reopen the setup guide"
+  },
+  "obFreqTitle": {
+    "message": "How often should it check?"
+  },
+  "obFreqDesc": {
+    "message": "MarkSync checks your platforms on this schedule in the background. When something new shows up it tells you — no need to dig through them yourself."
+  },
+  "obFreqNote": {
+    "message": "You can change this any time in settings."
+  },
+  "freq30m": {
+    "message": "Every 30 minutes"
+  },
+  "freq1h": {
+    "message": "Every hour"
+  },
+  "freq3h": {
+    "message": "Every 3 hours"
+  },
+  "freq6h": {
+    "message": "Every 6 hours"
+  },
+  "freq12h": {
+    "message": "Every 12 hours"
+  },
+  "freq1d": {
+    "message": "Once a day"
+  },
+  "obSyncedNone": {
+    "message": "Nothing pulled yet — you may not be signed in anywhere. Sign in, then hit sync again."
   }
 }

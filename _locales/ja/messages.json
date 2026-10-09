@@ -391,12 +391,6 @@
   "obLimitFootnote": {
     "message": "上限は各 100 件。この設定は初回同期にだけ効きます。"
   },
-  "obDoneTitle": {
-    "message": "準備完了"
-  },
-  "obDoneDesc": {
-    "message": "$1 個のプラットフォームを選択しました。下のボタンで初回同期を開始します。"
-  },
   "obBtnStartSync": {
     "message": "同期を開始"
   },
@@ -423,5 +417,35 @@
   },
   "optBtnOnboarding": {
     "message": "セットアップガイドを開き直す"
+  },
+  "obFreqTitle": {
+    "message": "どのくらいの頻度で同期しますか"
+  },
+  "obFreqDesc": {
+    "message": "この間隔でバックグラウンドから各プラットフォームを確認します。新着があればお知らせするので、自分で探す必要はありません。"
+  },
+  "obFreqNote": {
+    "message": "あとから設定でいつでも変更できます。"
+  },
+  "freq30m": {
+    "message": "30 分ごと"
+  },
+  "freq1h": {
+    "message": "1 時間ごと"
+  },
+  "freq3h": {
+    "message": "3 時間ごと"
+  },
+  "freq6h": {
+    "message": "6 時間ごと"
+  },
+  "freq12h": {
+    "message": "12 時間ごと"
+  },
+  "freq1d": {
+    "message": "1 日 1 回"
+  },
+  "obSyncedNone": {
+    "message": "まだ何も取得できていません。どのプラットフォームにもログインしていない可能性があります。"
   }
 }

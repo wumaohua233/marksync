@@ -1,109 +1,53 @@
-/* MarkSync 新手引导 —— Liquid Glass 视觉
+/* MarkSync 新手引导 —— 布局层
  *
- * 参考 iOS 26 的液态玻璃：半透明材质 + 强背景模糊与饱和、边缘高光、
- * 多层投影制造厚度感，配合带回弹的弹簧动画。
- *
- * 几个关键点：
- *   1. backdrop-filter 的 saturate() 比 blur() 更决定"玻璃感"——只模糊不饱和会发灰
- *   2. 玻璃的边缘必须有高光（顶部亮、底部暗），否则只是一块半透明色块
- *   3. 动效统一走弹簧曲线，不用 ease —— ease 看起来"软件感"，弹簧才像实体
+ * 色值、玻璃材质、按钮、开关统一定义在 ../lib/glass.css，
+ * 这一份只保留引导页自己的布局与动效。页内仍写 var(--ink) 这类简写，
+ * 靠下面的 :root 做一层别名，所以换 token 不用改正文。
  */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --brand: #FF2442;
-  --ink: #14161c;
-  --ink-2: #5b6271;
-  --ink-3: #8e95a3;
-
-  /* 玻璃材质。
-     卡片刻意做得**很透**（.34）：玻璃感来自「背后的颜色被模糊后透上来」，
-     不透明度过高就只剩一块白板。内侧高光的白色叠层负责把文字托住。 */
-  --glass-bg: rgba(255, 255, 255, .34);
-  --glass-brd: rgba(255, 255, 255, .78);
-  --glass-inner: rgba(255, 255, 255, .5);
-  --glass-shadow: 0 28px 70px -20px rgba(28, 32, 58, .34), 0 6px 18px -8px rgba(28, 32, 58, .16);
-  --blur: blur(52px) saturate(200%);
-
-  --spring: cubic-bezier(.34, 1.4, .5, 1);
-  --spring-soft: cubic-bezier(.32, .72, 0, 1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ink: #f5f5f7;
-    --ink-2: #a1a1a6;
-    --ink-3: #6e6e73;
-    --glass-bg: rgba(255, 255, 255, .07);
-    --glass-brd: rgba(255, 255, 255, .14);
-    --glass-inner: rgba(255, 255, 255, .06);
-    --glass-shadow: 0 28px 70px -20px rgba(0, 0, 0, .7), 0 6px 18px -8px rgba(0, 0, 0, .5);
-  }
+  --brand: var(--ms-brand);
+  --ink: var(--ms-ink);
+  --ink-2: var(--ms-ink-2);
+  --ink-3: var(--ms-ink-3);
+  --glass-bg: var(--ms-glass-bg);
+  --glass-brd: var(--ms-glass-brd);
+  --glass-inner: var(--ms-glass-inner);
+  --glass-shadow: var(--ms-glass-shadow);
+  --blur: var(--ms-blur);
+  --spring: var(--ms-spring);
+  --spring-soft: var(--ms-spring-soft);
 }
 
 html, body { height: 100%; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
-               "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif;
+  font-family: var(--ms-font);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
 }
 
-/* ── 背景：渐变 + 漂浮色斑 ───────────────────────────────── */
+/* 居中容器。背景交给共用的 .ms-bg（纯 CSS 渐变，不需要额外 DOM）。 */
 .stage {
   position: fixed; inset: 0;
   display: flex; align-items: center; justify-content: center;
   padding: 28px;
-  /* 背景必须够彩，否则卡片的 backdrop-filter 没东西可模糊，白搭 */
-  background: linear-gradient(150deg, #c9d8ff 0%, #f3d9ff 32%, #ffd9e8 58%, #c6f2e4 100%);
-}
-@media (prefers-color-scheme: dark) {
-  .stage { background: linear-gradient(150deg, #131a3a 0%, #2a1338 38%, #3a1226 62%, #07302c 100%); }
 }
 
-.blobs { position: absolute; inset: 0; overflow: hidden; filter: blur(58px); }
-.blob {
-  position: absolute; width: 52vmax; height: 52vmax; border-radius: 50%;
-  opacity: .62; will-change: transform;
-}
-.b1 { background: radial-gradient(circle, #6366f1 0%, rgba(99,102,241,0) 68%); top: -18%; left: -14%; animation: drift1 26s var(--spring-soft) infinite; }
-.b2 { background: radial-gradient(circle, #ec4899 0%, rgba(236,72,153,0) 68%); bottom: -22%; right: -12%; animation: drift2 31s var(--spring-soft) infinite; }
-.b3 { background: radial-gradient(circle, #0ea5a4 0%, rgba(14,165,164,0) 68%); top: 20%; right: 2%;   animation: drift3 37s var(--spring-soft) infinite; }
-.b4 { background: radial-gradient(circle, #f59e0b 0%, rgba(245,158,11,0) 68%); bottom: 2%; left: -2%;  animation: drift1 40s var(--spring-soft) infinite reverse; }
-@media (prefers-color-scheme: dark) { .blob { opacity: .48; } }
-
-@keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(9%, 7%) scale(1.14); } }
-@keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1.06); } 50% { transform: translate(-11%, -8%) scale(.94); } }
-@keyframes drift3 { 0%,100% { transform: translate(0,0) scale(.96); } 50% { transform: translate(-7%, 10%) scale(1.12); } }
-
-/* ── 玻璃卡片 ───────────────────────────────────────────── */
+/* ── 玻璃卡片 ─────────────────────────────────────────────
+   外观走共用 .ms-glass，这里只管尺寸与入场动画。 */
 .card {
   position: relative;
   width: min(660px, 100%);
   height: min(620px, calc(100vh - 56px));
   display: flex; flex-direction: column;
   border-radius: 34px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-brd);
-  box-shadow: var(--glass-shadow), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(0,0,0,.05),
-              inset 1px 0 0 rgba(255,255,255,.5), inset -1px 0 0 rgba(255,255,255,.5);
   overflow: hidden;
   animation: cardIn .85s var(--spring) both;
 }
-/* 斜向镜面高光：玻璃"反光"的来源，少了它整块会显得平 */
-.card::before {
-  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(138deg, rgba(255,255,255,.6) 0%, rgba(255,255,255,.1) 30%, transparent 52%);
-}
-@media (prefers-color-scheme: dark) {
-  .card::before { background: linear-gradient(138deg, rgba(255,255,255,.14) 0%, transparent 46%); }
-}
-
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(26px) scale(.955); }
   to   { opacity: 1; transform: none; }
@@ -155,33 +99,10 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; padding: 14px 30px 24px;
 }
-.btn {
-  font: inherit; font-size: 15px; font-weight: 600;
-  border-radius: 16px; padding: 13px 26px; cursor: pointer;
-  border: 1px solid transparent;
-  transition: transform .3s var(--spring), box-shadow .3s var(--spring),
-              background .2s, opacity .2s, filter .2s;
-}
-.btn:active { transform: scale(.955); }
-.btn:disabled { opacity: .4; cursor: not-allowed; }
-
-.btn.primary {
-  color: #fff; margin-left: auto;
-  background: linear-gradient(160deg, #ff3b57, var(--brand) 70%);
-  box-shadow: 0 10px 24px -8px rgba(255,36,66,.62), inset 0 1px 0 rgba(255,255,255,.34);
-}
-.btn.primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 14px 30px -8px rgba(255,36,66,.7), inset 0 1px 0 rgba(255,255,255,.34); }
-
-.btn.ghost {
-  color: var(--ink-2); background: var(--glass-inner);
-  border-color: var(--glass-brd);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.55);
-}
-.btn.ghost:hover { color: var(--ink); }
+/* 外观走共用 .ms-btn，这里只管本页的排列 */
+.foot .btn { font-size: 15px; padding: 13px 26px; border-radius: 16px; }
+.btn.primary { margin-left: auto; }
 .btn.ghost[hidden] { display: none; }
-
-.btn.text { background: none; color: var(--ink-3); padding: 13px 10px; font-weight: 500; }
-.btn.text:hover { color: var(--ink-2); }
 
 /* ── 第 1 步：欢迎 ──────────────────────────────────────── */
 .hero { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding-bottom: 24px; }
@@ -224,24 +145,6 @@ body {
 
 .p-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .p-name { font-size: 14.5px; font-weight: 600; letter-spacing: .1px; }
-
-/* iOS 风格开关 */
-.sw { position: relative; flex-shrink: 0; width: 42px; height: 25px; }
-.sw input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 2; }
-.sw .track {
-  position: absolute; inset: 0; border-radius: 999px;
-  background: rgba(120,120,128,.28);
-  transition: background .32s var(--spring-soft);
-}
-.sw .track::after {
-  content: ""; position: absolute; top: 2px; left: 2px; width: 21px; height: 21px;
-  border-radius: 50%; background: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,.22);
-  transition: transform .36s var(--spring);
-}
-.sw input:checked + .track { background: linear-gradient(160deg, #34d399, #10b981); }
-.sw input:checked + .track::after { transform: translateX(17px); }
-.sw input:focus-visible + .track { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 .p-bot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 24px; }
 .p-status { font-size: 12px; color: var(--ink-3); display: inline-flex; align-items: center; gap: 5px; }
@@ -322,10 +225,49 @@ input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 2px 8px rg
 
 .footnote { margin-top: 10px; font-size: 11.5px; color: var(--ink-3); line-height: 1.55; }
 
+/* ── 第 4 步：同步频率 ───────────────────────────────────
+   6 个选项单列排，选中行用一块绝对定位的高亮在行与行之间滑动——
+   比每行自己改背景好看得多，也是 iOS 设置页的那种手感。 */
+.freq-wrap { position: relative; margin-top: 16px; padding-bottom: 4px; }
+.freq-hl {
+  position: absolute; left: 0; right: 0; top: 0; height: 0;
+  border-radius: 15px; z-index: 0; pointer-events: none;
+  background: rgba(255,255,255,.8);
+  border: 1px solid rgba(255,255,255,.95);
+  box-shadow: 0 8px 20px -10px rgba(28,32,58,.34), inset 0 1px 0 rgba(255,255,255,.95);
+  transition: transform .46s var(--spring), height .46s var(--spring);
+}
+@media (prefers-color-scheme: dark) {
+  .freq-hl { background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.2); }
+}
+.freq {
+  position: relative; z-index: 1; width: 100%;
+  display: flex; align-items: center; gap: 11px;
+  padding: 12px 16px; border: none; background: none;
+  font: inherit; font-size: 14.5px; font-weight: 500; color: var(--ink-2);
+  border-radius: 15px; cursor: pointer; text-align: left;
+  transition: color .3s;
+}
+.freq.on { color: var(--ink); font-weight: 600; }
+.f-check {
+  width: 19px; height: 19px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid rgba(120,120,128,.45);
+  display: grid; place-items: center;
+  transition: border-color .3s, background .3s;
+}
+.f-check::after {
+  content: ""; width: 8px; height: 8px; border-radius: 50%; background: #fff;
+  transform: scale(0); transition: transform .38s var(--spring);
+}
+.freq.on .f-check { border-color: var(--brand); background: var(--brand); }
+.freq.on .f-check::after { transform: scale(1); }
+
 /* ── 第 4 步：完成 / 同步中 ─────────────────────────────── */
 .finish { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding-bottom: 24px; }
 .ring { position: relative; width: 104px; height: 104px; display: grid; place-items: center; }
-.ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+/* 不要在这里写 transform: rotate(-90deg)——旋转只能加在 .bar 圆上
+   （见 onboarding.html 里的注释），否则勾会跟着转、顶点跑到右边变成「›」。 */
+.ring svg { position: absolute; inset: 0; }
 .ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
 .ring .trk { stroke: rgba(120,120,128,.2); }
 .ring .bar { stroke: var(--brand); stroke-dasharray: 283; stroke-dashoffset: 283; transition: stroke-dashoffset .6s var(--spring-soft); }

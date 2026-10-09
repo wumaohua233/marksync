@@ -47,7 +47,7 @@ function renderLimits(limits) {
   $("limits").innerHTML = store.platforms().map((p) => `
     <div class="lim-row">
       <span class="lim-name">${escapeHtml(store.platformLabel(p))}</span>
-      <input type="number" min="0" max="100" step="5" data-limit="${p}" value="${limits[p] ?? 100}">
+      <input type="number" min="0" max="100" step="5" data-limit="${p}" value="${limits[p] ?? 10}">
       <span class="lim-unit">/ 100</span>
     </div>`).join("");
 }
@@ -80,7 +80,7 @@ $("btn-save").addEventListener("click", async () => {
   const limits = {};
   document.querySelectorAll("#limits input[data-limit]").forEach((inp) => {
     const v = parseInt(inp.value, 10);
-    limits[inp.dataset.limit] = Math.max(0, Math.min(100, Number.isFinite(v) ? v : 100));
+    limits[inp.dataset.limit] = Math.max(0, Math.min(100, Number.isFinite(v) ? v : 10));
   });
   s.firstRunLimits = limits;
   const raw = parseFloat($("intervalValue").value);

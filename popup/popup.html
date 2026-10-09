@@ -2,85 +2,227 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark">
+  <link rel="stylesheet" href="../lib/glass.css">
   <style>
+    /* 弹窗：面积小、内容密。背景压淡（.ms-bg.soft）+ 列表垫一层白纱，
+       否则颜色比内容还抢眼，长清单也读不清。 */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { overflow: hidden; min-width: 0; }
-    body { width: 520px; font-family: -apple-system, "PingFang SC", "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif; }
-    .popup-root { width: 100%; max-width: 100%; max-height: 560px; overflow-y: auto; overflow-x: hidden; background: #fafafa; }
+    body { width: 520px; font-family: var(--ms-font); color: var(--ms-ink); -webkit-font-smoothing: antialiased; }
+    /* 白纱铺在整个 root 上而不是只铺清单：清单短的时候下面会露出一截裸背景，
+       看起来像没渲染完。 */
+    .popup-root {
+      position: relative; width: 100%; max-width: 100%; max-height: 560px;
+      overflow-y: auto; overflow-x: hidden;
+      background: rgba(255,255,255,.34);
+    }
+    @media (prefers-color-scheme: dark) { .popup-root { background: rgba(30,30,34,.3); } }
     img, svg, canvas { display: block; max-width: 100%; }
-    header { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #eee; padding: 12px 14px; z-index: 10; }
-    .title-row { display: flex; align-items: center; justify-content: space-between; }
-    h1 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+
+    /* ── 头部：玻璃条，吸顶时模糊滚动到它后面的清单 ── */
+    header {
+      position: sticky; top: 0; z-index: 10;
+      padding: 12px 14px 10px;
+      background: rgba(255,255,255,.62);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border-bottom: 1px solid rgba(255,255,255,.7);
+      box-shadow: 0 6px 18px -12px rgba(28,32,58,.3);
+    }
+    @media (prefers-color-scheme: dark) {
+      header { background: rgba(30,30,34,.62); border-bottom-color: rgba(255,255,255,.12); }
+    }
+    .title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    h1 { font-size: 15px; font-weight: 650; display: flex; align-items: center; gap: 7px; letter-spacing: .1px; }
     .brand-ico { width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; }
-    .unread { background: #FF2442; color: #fff; font-size: 11px; border-radius: 9px; padding: 1px 8px; margin-left: 6px; }
-    .actions { display: flex; gap: 6px; }
-    button { border: 1px solid #ddd; background: #fff; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; color: #333; }
-    button:hover { background: #f5f5f5; }
-    button.primary { background: #FF2442; border-color: #FF2442; color: #fff; }
-    button.primary:hover { background: #e01e3a; }
-    button:disabled { opacity: .5; cursor: default; }
-    .status { font-size: 11px; color: #999; margin-top: 6px; }
+    .unread {
+      background: var(--ms-brand); color: #fff; font-size: 11px; font-weight: 600;
+      border-radius: 9px; padding: 1px 8px; margin-left: 2px;
+      box-shadow: 0 3px 8px -3px rgba(255,36,66,.6);
+    }
+
+    /* ── 按钮 ── */
+    .actions { display: flex; gap: 6px; align-items: center; }
+    button {
+      font: inherit; font-size: 12px; font-weight: 500;
+      border: 1px solid rgba(255,255,255,.7);
+      background: rgba(255,255,255,.55); color: var(--ms-ink);
+      border-radius: 10px; padding: 5px 11px; cursor: pointer;
+      transition: transform .25s var(--ms-spring), background .18s, color .18s, box-shadow .25s;
+    }
+    button:hover { background: rgba(255,255,255,.85); }
+    button:active { transform: scale(.95); }
+    button.primary {
+      background: linear-gradient(160deg, #ff3b57, var(--ms-brand) 70%);
+      border-color: transparent; color: #fff; font-weight: 600;
+      box-shadow: 0 6px 14px -6px rgba(255,36,66,.6), inset 0 1px 0 rgba(255,255,255,.3);
+    }
+    button.primary:hover { box-shadow: 0 8px 18px -6px rgba(255,36,66,.7), inset 0 1px 0 rgba(255,255,255,.3); }
+    button:disabled { opacity: .45; cursor: default; }
+
+    .status { font-size: 11px; color: var(--ms-ink-3); margin-top: 7px; line-height: 1.5; }
     .status .err { color: #d4380d; }
-    .first-run { margin-top: 5px; color: #ad6800; background: #fff7e6; border: 1px solid #ffe1b3; border-radius: 6px; padding: 5px 8px; line-height: 1.45; }
-    .tabs { display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
-    .tab { flex-shrink: 0; font-size: 11px; color: #666; padding: 3px 8px; border-radius: 12px; cursor: pointer; border: none; background: #f0f0f1; }
-    .tab:hover { background: #e8e8ea; }
-    .tab.active { background: #FF2442; color: #fff; }
-    .tab .cnt { font-size: 10px; opacity: .75; margin-left: 2px; }
-    .group-label { font-size: 12px; color: #999; padding: 10px 14px 4px; }
-    .group-label .gl-time { color: #c4c4c4; font-weight: normal; }
-    .t-date { color: #FF2442; }
-    .t-time { color: #9a9a9a; }
-    .item { display: flex; gap: 10px; padding: 10px 14px; background: #fff; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-    .item:hover { background: #f9f9f9; }
-    .item.read { opacity: .55; }
-    .item img { width: 52px; height: 68px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #f5f5f5; opacity: 0; transition: opacity .18s ease; }
+    .first-run {
+      margin-top: 6px; color: #ad6800; background: rgba(255,247,230,.9);
+      border: 1px solid #ffe1b3; border-radius: 8px; padding: 6px 9px; line-height: 1.5;
+    }
+    @media (prefers-color-scheme: dark) {
+      .first-run { background: rgba(120,80,10,.28); border-color: rgba(255,190,90,.28); color: #f0c070; }
+    }
+
+    /* ── 平台标签页 ── */
+    /* 单行横向滚动，不换行。13 个平台折成 3 行会把清单挤到屏幕外。 */
+    .tabs {
+      display: flex; gap: 5px; margin-top: 9px;
+      flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
+      padding-bottom: 2px; scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex-shrink: 0; font-size: 11px; color: var(--ms-ink-2);
+      padding: 4px 10px; border-radius: 999px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,.6); background: rgba(255,255,255,.42);
+      transition: transform .3s var(--ms-spring), background .2s, color .2s, box-shadow .3s;
+    }
+    .tab:hover { background: rgba(255,255,255,.75); }
+    .tab:active { transform: scale(.94); }
+    .tab.active {
+      background: linear-gradient(160deg, #ff3b57, var(--ms-brand) 70%);
+      border-color: transparent; color: #fff; font-weight: 600;
+      box-shadow: 0 5px 12px -5px rgba(255,36,66,.6);
+    }
+    .tab .cnt { font-size: 10px; opacity: .8; margin-left: 3px; }
+
+    /* ── 清单 ── */
+    .group-label {
+      font-size: 11.5px; font-weight: 600; color: var(--ms-ink-2);
+      padding: 11px 14px 5px; letter-spacing: .2px;
+    }
+    .group-label .gl-time { color: var(--ms-ink-3); font-weight: 400; }
+    .t-date { color: var(--ms-brand); }
+    .t-time { color: var(--ms-ink-3); }
+
+    .item {
+      display: flex; gap: 10px; padding: 10px 14px;
+      background: transparent; border-bottom: 1px solid rgba(0,0,0,.05);
+      cursor: pointer; transition: background .18s;
+    }
+    @media (prefers-color-scheme: dark) { .item { border-bottom-color: rgba(255,255,255,.07); } }
+    .item:hover { background: rgba(255,255,255,.55); }
+    .item.read { opacity: .5; }
+    .item img {
+      width: 52px; height: 68px; object-fit: cover; border-radius: 8px; flex-shrink: 0;
+      background: rgba(255,255,255,.5); opacity: 0; transition: opacity .2s ease;
+    }
     .item img.loaded { opacity: 1; }
     .item .body { flex: 1; min-width: 0; }
-    .item .t { font-size: 13px; font-weight: 500; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .item .meta { font-size: 11px; color: #aaa; margin-top: 4px; }
-    .mark-read { align-self: center; flex-shrink: 0; font-size: 11px; color: #FF2442; border: 1px solid #FF2442; background: #fff; border-radius: 10px; padding: 2px 8px; cursor: pointer; }
-    .mark-read:hover { background: #FF2442; color: #fff; }
-    .login-inline { font-size: 11px; color: #FF2442; border: 1px solid #FF2442; background: #fff; border-radius: 10px; padding: 1px 8px; cursor: pointer; margin-left: 4px; vertical-align: 1px; }
-    .login-inline:hover { background: #FF2442; color: #fff; }
-    .dot { display: inline-block; width: 6px; height: 6px; background: #FF2442; border-radius: 50%; margin-right: 4px; vertical-align: 1px; }
-    .empty { text-align: center; color: #bbb; font-size: 13px; padding: 60px 0; }
-    .running-tip { font-size: 11px; color: #FF2442; margin-top: 6px; display: none; }
-    .login-bar { display: none; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; padding: 8px 10px; background: #fff7e6; border: 1px solid #ffe1b3; border-radius: 8px; }
+    .item .t {
+      font-size: 13px; font-weight: 500; line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .item .meta { font-size: 11px; color: var(--ms-ink-3); margin-top: 4px; }
+
+    .mark-read {
+      align-self: center; flex-shrink: 0;
+      font-size: 11px; font-weight: 600; color: var(--ms-brand);
+      border: 1px solid rgba(255,36,66,.3); background: rgba(255,255,255,.6);
+      border-radius: 999px; padding: 3px 10px; cursor: pointer;
+      transition: transform .25s var(--ms-spring), background .2s, color .2s;
+    }
+    .mark-read:hover { background: var(--ms-brand); color: #fff; border-color: transparent; }
+    .mark-read:active { transform: scale(.93); }
+
+    .dot {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--ms-brand); margin-right: 5px; vertical-align: 1px;
+      box-shadow: 0 0 0 3px rgba(255,36,66,.14);
+    }
+    .empty { text-align: center; color: var(--ms-ink-3); font-size: 13px; padding: 60px 24px; line-height: 1.7; }
+    .running-tip { font-size: 11px; color: var(--ms-brand); margin-top: 7px; display: none; font-weight: 500; }
+
+    /* ── 未登录提示 ── */
+    .login-bar {
+      display: none; align-items: center; flex-wrap: wrap; gap: 7px;
+      margin-top: 9px; padding: 9px 11px; border-radius: 12px;
+      background: rgba(255,247,230,.88); border: 1px solid #ffe1b3;
+    }
+    @media (prefers-color-scheme: dark) {
+      .login-bar { background: rgba(120,80,10,.3); border-color: rgba(255,190,90,.3); }
+    }
     .login-bar .tip { font-size: 12px; color: #ad6800; }
-    .login-btn { font-size: 12px; color: #fff; border: none; }
+    .login-btn { font-size: 11.5px; font-weight: 600; color: #fff; border: none; border-radius: 999px; padding: 4px 12px; }
     .login-btn[data-platform="xhs"] { background: #FF2442; }
-    .login-btn[data-platform="xhs"]:hover { background: #e01e3a; }
     .login-btn[data-platform="douyin"] { background: #161823; }
-    .login-btn[data-platform="douyin"]:hover { background: #000; }
     .login-btn[data-platform="youtube"] { background: #FF0000; }
-    .login-btn[data-platform="youtube"]:hover { background: #cc0000; }
     .login-btn[data-platform="x"] { background: #000; }
-    .login-btn[data-platform="x"]:hover { background: #333; }
     .login-btn[data-platform="tiktok"] { background: #FE2C55; }
-    .login-btn[data-platform="tiktok"]:hover { background: #d81f43; }
-    .login-btn[data-platform="instagram"] { background: #C13584; }
-    .login-btn[data-platform="instagram"]:hover { background: #a02c6f; }
+    .login-btn[data-platform="instagram"] { background: linear-gradient(45deg, #f09433, #dc2743 50%, #bc1888); }
+
+    .login-inline {
+      font-size: 11px; color: var(--ms-brand);
+      border: 1px solid rgba(255,36,66,.35); background: rgba(255,255,255,.55);
+      border-radius: 999px; padding: 2px 9px; cursor: pointer; margin-left: 5px; vertical-align: 1px;
+      transition: background .2s, color .2s;
+    }
+    .login-inline:hover { background: var(--ms-brand); color: #fff; border-color: transparent; }
+
+    /* ── 分裂按钮 + 平台下拉 ── */
     .split-btn { position: relative; display: inline-flex; }
-    .split-btn #btn-run { border-radius: 6px 0 0 6px; }
-    .split-btn .caret { border-radius: 0 6px 6px 0; border-left: 1px solid rgba(255,255,255,.35); padding: 4px 7px; font-size: 10px; }
-    .sync-menu { position: absolute; top: calc(100% + 4px); right: 0; background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.16); padding: 4px; z-index: 30; min-width: 168px; }
+    .split-btn #btn-run { border-radius: 10px 0 0 10px; }
+    .split-btn .caret {
+      border-radius: 0 10px 10px 0; border-left: 1px solid rgba(255,255,255,.35);
+      padding: 5px 8px; font-size: 10px;
+    }
+    .sync-menu {
+      position: absolute; top: calc(100% + 6px); right: 0; z-index: 30; min-width: 172px;
+      padding: 5px; border-radius: 14px;
+      background: rgba(255,255,255,.82);
+      backdrop-filter: blur(30px) saturate(180%);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid rgba(255,255,255,.8);
+      box-shadow: 0 18px 40px -14px rgba(28,32,58,.4), inset 0 1px 0 rgba(255,255,255,.9);
+      animation: menuIn .28s var(--ms-spring) both;
+    }
+    @media (prefers-color-scheme: dark) {
+      .sync-menu { background: rgba(38,38,42,.85); border-color: rgba(255,255,255,.14); }
+    }
+    @keyframes menuIn { from { opacity: 0; transform: translateY(-6px) scale(.97); } to { opacity: 1; transform: none; } }
     .sync-menu[hidden] { display: none; }
-    .sync-menu button { display: block; width: 100%; text-align: left; border: none; background: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; }
-    .sync-menu button:hover { background: #f5f5f5; }
-    .sync-menu .p-name { display: block; font-size: 13px; color: #333; white-space: nowrap; }
-    .sync-menu .p-time { display: block; font-size: 10px; color: #b8b8b8; margin-top: 1px; white-space: nowrap; }
-    .update-bar { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 7px 10px; background: #e6f4ff; border: 1px solid #91caff; border-radius: 8px; font-size: 12px; color: #0958d9; }
+    .sync-menu button {
+      display: block; width: 100%; text-align: left; border: none; background: none;
+      padding: 8px 12px; border-radius: 9px; cursor: pointer;
+    }
+    .sync-menu button:hover { background: rgba(255,255,255,.7); }
+    .sync-menu .p-name { display: block; font-size: 13px; color: var(--ms-ink); white-space: nowrap; font-weight: 500; }
+    .sync-menu .p-time { display: block; font-size: 10px; color: var(--ms-ink-3); margin-top: 2px; white-space: nowrap; }
+
+    /* ── 新版本提示条 ── */
+    .update-bar {
+      display: flex; align-items: center; gap: 8px; margin-top: 9px;
+      padding: 8px 11px; border-radius: 12px; font-size: 12px;
+      background: rgba(230,244,255,.9); border: 1px solid #91caff; color: #0958d9;
+    }
+    @media (prefers-color-scheme: dark) {
+      .update-bar { background: rgba(20,60,110,.45); border-color: rgba(120,180,255,.32); color: #9ecbff; }
+    }
     .update-bar[hidden] { display: none; }
     .update-bar .u-text { flex: 1; }
-    .update-bar .u-go { font-size: 12px; color: #fff; background: #1677ff; border: none; border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+    .update-bar .u-go {
+      font-size: 12px; font-weight: 600; color: #fff; cursor: pointer;
+      background: #1677ff; border: none; border-radius: 8px; padding: 4px 11px;
+    }
     .update-bar .u-go:hover { background: #0958d9; }
-    .update-bar .u-x { border: none; background: none; color: #69b1ff; font-size: 15px; line-height: 1; padding: 0 2px; cursor: pointer; }
+    .update-bar .u-x {
+      border: none; background: none; color: #69b1ff; font-size: 15px;
+      line-height: 1; padding: 0 3px; cursor: pointer;
+    }
     .update-bar .u-x:hover { color: #0958d9; }
   </style>
 </head>
 <body>
-  <div class="popup-root">
+  <div class="ms-bg soft"></div>
+  <div class="popup-root ms-scroll">
   <header>
     <div class="title-row">
       <h1><img class="brand-ico" src="../icons/32.png" alt=""><span data-i18n="extName">MarkSync</span><span class="unread" id="unread" style="display:none"></span></h1>

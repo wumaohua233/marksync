@@ -10,7 +10,11 @@ applyI18n();
 
 const $ = (id) => document.getElementById(id);
 const MAX_LIMIT = 100;
-const DEFAULT_LIMIT = 100;
+const DEFAULT_LIMIT = 10;   // 见 lib/store.js 里为什么是 10
+
+// 同步频率选项（分钟）。默认 3 小时。
+const FREQ = [30, 60, 180, 360, 720, 1440];
+const FREQ_KEY = { 30: "freq30m", 60: "freq1h", 180: "freq3h", 360: "freq6h", 720: "freq12h", 1440: "freq1d" };
 const STEPS = 4;
 
 // 登录入口（按平台）。这些只是"打开对应网站的登录页"，
@@ -28,6 +32,7 @@ let settings;
 let loginStatus = null;   // null = 还没查过；{xhs:true,...}
 let cur = 0;
 let syncing = false;
+let lastState = "freq";   // 最后一步的三个形态：freq → syncing → done
 
 const plats = () => store.platforms();
 const enabledOf = (p) => store.sourcesOf(p).some((s) => settings.sources[s]);
@@ -41,7 +46,6 @@ function renderDots() {
 
 // ── 步骤切换 ────────────────────────────────────────────
 function show(n) {
-  const prev = cur;
   cur = n;
   document.querySelectorAll(".step").forEach((el) => {
     const i = Number(el.dataset.step);
@@ -51,15 +55,15 @@ function show(n) {
   });
   renderDots();
 
-  $("back").hidden = n === 0;
   const next = $("next");
-  next.textContent = n === 0 ? t("obStart") : n === STEPS - 1 ? t("obBtnStartSync") : t("obNext");
-  next.disabled = n === 1 && !plats().some(enabledOf);
+  $("back").hidden = n === 0;
   $("skip").hidden = n === STEPS - 1;
+  next.disabled = n === 1 && !plats().some(enabledOf);
+  next.textContent = n === 0 ? t("obStart") : n === STEPS - 1 ? t("obBtnStartSync") : t("obNext");
 
   if (n === 1) refreshLogins();
   if (n === 2) renderLimits();
-  if (n === 3) renderFinish(prev < 3);
+  if (n === 3) setLastState("freq");
 }
 
 // ── 第 2 步：平台 ───────────────────────────────────────
@@ -72,7 +76,7 @@ function renderPlats() {
       <div class="plat ${on ? "" : "off"}" data-p="${p}">
         <div class="p-top">
           <span class="p-name">${esc(platformLabel(p))}</span>
-          <label class="sw">
+          <label class="ms-sw">
             <input type="checkbox" data-toggle="${p}" ${on ? "checked" : ""}>
             <span class="track"></span>
           </label>
@@ -160,33 +164,89 @@ function paintRange(el) {
   el.style.setProperty("--fill", (el.value / MAX_LIMIT * 100) + "%");
 }
 
-// ── 第 4 步：完成 / 同步 ────────────────────────────────
-function renderFinish(reset) {
-  if (reset) {
-    syncing = false;
-    $("ring").classList.remove("ok", "busy");
-    $("ring").querySelector(".bar").style.strokeDashoffset = 283;
-    $("finTitle").textContent = t("obDoneTitle");
-    $("finDesc").textContent = t("obDoneDesc", String(plats().filter(enabledOf).length));
-    $("next").hidden = false;
+// ── 第 4 步：同步频率 ───────────────────────────────────
+function renderFreq() {
+  let v = settings.intervalMinutes;
+  // 用户可能在设置页填过任意分钟数（比如 45），不在这 6 个选项里。
+  // 就近吸附到一个选项，避免一个都没选中。
+  if (!FREQ.includes(v)) {
+    v = FREQ.reduce((a, b) => (Math.abs(b - v) < Math.abs(a - v) ? b : a));
+    settings.intervalMinutes = v;
+    save();
+  }
+  $("freq-opts").innerHTML = FREQ.map((m) =>
+    `<button class="freq ${m === v ? "on" : ""}" type="button" data-freq="${m}">` +
+    `<span class="f-check"></span><span>${esc(t(FREQ_KEY[m]))}</span></button>`
+  ).join("");
+
+  $("freq-opts").querySelectorAll("button[data-freq]").forEach((b) => {
+    b.addEventListener("click", () => {
+      settings.intervalMinutes = Number(b.dataset.freq);
+      save();
+      $("freq-opts").querySelectorAll("button").forEach((x) =>
+        x.classList.toggle("on", x === b));
+      moveFreqHl();
+    });
+  });
+  // 首帧不要动画，否则会从顶部"滑"到当前选项
+  moveFreqHl(false);
+}
+
+function moveFreqHl(animate = true) {
+  const opts = $("freq-opts");
+  const on = opts.querySelector(".freq.on");
+  const hl = $("freq-hl");
+  if (!on) return;
+  hl.style.transition = animate ? "" : "none";
+  hl.style.transform = `translateY(${on.offsetTop}px)`;
+  hl.style.height = on.offsetHeight + "px";
+  if (!animate) void hl.offsetHeight;   // 强制回流，避免 next frame 又动画一次
+}
+
+// ── 最后一步的三个形态：选频率 → 同步中 → 结果 ───────────
+// 合并成同一个 step，省掉一个"完成"圆点——用户在那一步其实没东西可配。
+function setLastState(s) {
+  lastState = s;
+  $("freq-view").hidden = s !== "freq";
+  $("finish-view").hidden = s === "freq";
+
+  const btn = $("next");
+  const ring = $("ring");
+  btn.disabled = false;
+
+  if (s === "freq") {
+    btn.textContent = t("obBtnStartSync");
+    btn.hidden = false;
     $("back").hidden = false;
+    $("skip").hidden = false;
+    renderFreq();
+  } else if (s === "syncing") {
+    btn.hidden = true;
+    $("back").hidden = true;
+    $("skip").hidden = true;
+    ring.classList.remove("ok");
+    ring.classList.add("busy");
+    ring.querySelector(".bar").style.strokeDashoffset = 283;
+    $("finTitle").textContent = t("obSyncingTitle");
+    $("finDesc").textContent = t("obSyncingDesc");
+  } else {
+    ring.classList.remove("busy");
+    ring.classList.add("ok");
+    btn.textContent = t("obBtnFinish");
+    btn.hidden = false;
+    $("back").hidden = true;
+    $("skip").hidden = true;
   }
 }
 
 async function startSync() {
   if (syncing) return;
   syncing = true;
-
-  $("next").hidden = true;
-  $("back").hidden = true;
-  $("skip").hidden = true;
-  const ring = $("ring");
-  ring.classList.add("busy");
-  $("finTitle").textContent = t("obSyncingTitle");
-  $("finDesc").textContent = t("obSyncingDesc");
+  setLastState("syncing");
 
   await store.saveSettings(settings);
 
+  const ring = $("ring");
   const bar = ring.querySelector(".bar");
   let fake = 0;
   // 真实进度拿不到（采集是背景流程），用一个缓慢逼近 90% 的假进度条，
@@ -204,26 +264,17 @@ async function startSync() {
     ok = false;
   }
   clearInterval(tick);
-
   bar.style.strokeDashoffset = 0;
-  ring.classList.remove("busy");
-  ring.classList.add("ok");
 
   const items = await store.getItems();
   const n = Object.keys(items).length;
 
-  $("finTitle").textContent = ok ? t("obSyncedTitle") : t("obSyncedDesc");
-  $("finDesc").textContent = ok
-    ? t("obSyncedDesc", String(n))
-    : t("obSyncingDesc");
+  setLastState("done");
+  $("finTitle").textContent = t("obSyncedTitle");
+  $("finDesc").textContent = n > 0 ? t("obSyncedDesc", String(n)) : t("obSyncedNone");
 
   settings.onboarded = true;
   await store.saveSettings(settings);
-
-  const btn = $("next");
-  btn.hidden = false;
-  btn.textContent = t("obBtnFinish");
-  btn.disabled = false;
   syncing = false;
 }
 
@@ -255,7 +306,7 @@ $("next").addEventListener("click", () => {
   }
   if (cur === STEPS - 1) {
     if (syncing) return;
-    if ($("next").textContent === t("obBtnFinish")) return finish();
+    if (lastState === "done") return finish();
     return startSync();
   }
   show(cur + 1);
@@ -267,11 +318,13 @@ $("refresh").addEventListener("click", refreshLogins);
 
 // 用户去别的标签页登录完回来，自动刷新登录状态
 window.addEventListener("focus", () => { if (cur === 1) refreshLogins(); });
+// 高亮是绝对定位的，尺寸一变就要重算，否则会错位
+window.addEventListener("resize", () => { if (cur === 3 && lastState === "freq") moveFreqHl(false); });
 
 // ── 启动 ────────────────────────────────────────────────
 (async () => {
   settings = await store.getSettings();
-  // 首次使用：默认全开、每平台 100 条（用户可以自己调小）
+  // 首次使用：默认全开、每平台 10 条（用户可以自己调大）
   if (!settings.firstRunLimits) {
     settings.firstRunLimits = Object.fromEntries(plats().map((p) => [p, DEFAULT_LIMIT]));
   }

@@ -25,6 +25,10 @@ SOURCE_LOCALES = ["zh_CN", "en", "ja"]
 # 代码里动态拼接的 key 前缀（store.js 里 t("plat_" + platform) 这种）
 DYNAMIC_PREFIXES = ("plat_", "src_", "srcs_")
 
+# 通过查表引用的 key，静态扫不出来。例如 onboarding.js 里的 t(FREQ_KEY[m])。
+# 新增这类写法时记得往这里加，否则会被误报成「没人用」。
+LOOKUP_KEYS = {"freq30m", "freq1h", "freq3h", "freq6h", "freq12h", "freq1d"}
+
 # 匹配 t("x") / msg("x") / tTime("x") / getMessage("x")
 RE_CALL = re.compile(r'\b(?:t|msg|tTime|tWithHtml|getMessage)\(\s*"([A-Za-z_]\w*)"')
 RE_ATTR = re.compile(r'data-i18n(?:-title|-placeholder)?="([A-Za-z_]\w*)"')
@@ -179,7 +183,7 @@ def main():
     # 只统计真正被引用的 key，把动态拼接前缀排掉
     referenced = {k for k in used if not is_dynamic(k)}
     dynamic = {k for k in base if k.startswith(DYNAMIC_PREFIXES)}
-    unused = sorted(k for k in base - referenced - dynamic)
+    unused = sorted(k for k in base - referenced - dynamic - LOOKUP_KEYS)
 
     if missing:
         for k in missing:

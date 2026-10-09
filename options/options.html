@@ -2,44 +2,114 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark">
   <title data-i18n="optionsTitle">MarkSync · 设置</title>
+  <link rel="stylesheet" href="../lib/glass.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, "PingFang SC", "Hiragino Sans", "Yu Gothic UI", "Microsoft YaHei", "Noto Sans CJK", sans-serif; background: #fafafa; color: #333; }
-    .wrap { max-width: 560px; margin: 40px auto; background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 28px 32px; }
-    h1 { font-size: 18px; margin-bottom: 24px; }
-    h2 { font-size: 14px; margin: 24px 0 12px; color: #666; font-weight: 600; }
-    label { display: block; font-size: 13px; margin-bottom: 4px; color: #555; }
-    input[type=text], input[type=password], input[type=number], select {
-      width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; font-size: 13px; margin-bottom: 12px;
+    body {
+      font-family: var(--ms-font); color: var(--ms-ink);
+      background: #eceff4; -webkit-font-smoothing: antialiased;
+      min-height: 100vh; padding: 40px 22px 60px;
     }
-    input:focus, select:focus { outline: none; border-color: #FF2442; }
+    /* 背景铺满整页并固定，滚动时不动 —— 动的话卡片后面的颜色会"流"过去，很晕 */
+    body > .ms-bg { position: fixed; }
+
+    .wrap {
+      position: relative; max-width: 620px; margin: 0 auto;
+      border-radius: 28px; padding: 30px 34px 34px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+
+    .head { display: flex; align-items: center; gap: 11px; margin-bottom: 26px; }
+    .head img { width: 34px; height: 34px; border-radius: 11px; box-shadow: 0 6px 14px -6px rgba(255,36,66,.5); }
+    h1 { font-size: 19px; font-weight: 700; letter-spacing: -.2px; }
+
+    h2 {
+      font-size: 13px; font-weight: 650; color: var(--ms-ink-2);
+      margin: 26px 0 10px; letter-spacing: .3px;
+    }
+    h2:first-of-type { margin-top: 0; }
+
+    label { display: block; font-size: 13px; margin-bottom: 6px; color: var(--ms-ink-2); }
+
+    input[type=text], input[type=password], input[type=number], select {
+      width: 100%; font: inherit; font-size: 13.5px; color: var(--ms-ink);
+      background: rgba(255,255,255,.62); border: 1px solid rgba(255,255,255,.85);
+      border-radius: 11px; padding: 9px 12px; margin-bottom: 12px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      -webkit-appearance: none; appearance: none;
+    }
+    @media (prefers-color-scheme: dark) {
+      input[type=text], input[type=password], input[type=number], select {
+        background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16);
+      }
+    }
+    input:focus, select:focus {
+      outline: none; border-color: var(--ms-brand);
+      box-shadow: 0 0 0 3px rgba(255,36,66,.16), inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    select { background-image: none; cursor: pointer; }
+
     .row { display: flex; gap: 12px; }
     .row > div { flex: 1; }
     .interval { display: flex; gap: 8px; }
-    .interval input { flex: 1; }
-    .interval select { width: 90px; flex-shrink: 0; }
-    button { border: 1px solid #ddd; background: #fff; border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; }
-    button.primary { background: #FF2442; border-color: #FF2442; color: #fff; }
-    .btn-row { display: flex; gap: 10px; margin-top: 28px; align-items: center; }
-    #msg { font-size: 12px; margin-left: 4px; }
-    #msg.ok { color: #52c41a; }
+    .interval input { flex: 1; margin-bottom: 0; }
+    .interval select { width: 96px; flex-shrink: 0; margin-bottom: 0; }
+
+    button {
+      font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+      border-radius: 12px; padding: 9px 18px;
+      border: 1px solid rgba(255,255,255,.75); background: rgba(255,255,255,.6); color: var(--ms-ink);
+      transition: transform .28s var(--ms-spring), background .2s, color .2s, box-shadow .28s;
+    }
+    button:hover { background: rgba(255,255,255,.9); }
+    button:active { transform: scale(.96); }
+    button.primary {
+      background: linear-gradient(160deg, #ff3b57, var(--ms-brand) 70%);
+      border-color: transparent; color: #fff;
+      box-shadow: 0 8px 20px -8px rgba(255,36,66,.65), inset 0 1px 0 rgba(255,255,255,.3);
+    }
+    button.primary:hover { box-shadow: 0 11px 24px -8px rgba(255,36,66,.72), inset 0 1px 0 rgba(255,255,255,.3); }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 26px; align-items: center; flex-wrap: wrap; }
+    #msg { font-size: 12.5px; margin-left: 2px; font-weight: 500; }
+    #msg.ok { color: #10b981; }
     #msg.err { color: #d4380d; }
-    .hint { font-size: 12px; color: #999; margin-top: -8px; margin-bottom: 12px; }
+    .hint { font-size: 12px; color: var(--ms-ink-3); margin: -4px 0 12px; line-height: 1.6; }
+
+    /* 数据源开关 */
     .src-group { margin-bottom: 14px; }
-    .src-plat { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 6px; }
-    .src-items { display: flex; flex-wrap: wrap; gap: 14px; }
-    .src-item { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #555; margin-bottom: 0; cursor: pointer; }
-    .src-item input[type=checkbox] { width: auto; margin: 0; }
+    .src-plat { display: block; font-size: 13px; font-weight: 650; margin-bottom: 7px; }
+    .src-items { display: flex; flex-wrap: wrap; gap: 10px; }
+    .src-item {
+      display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+      font-size: 13px; color: var(--ms-ink-2); margin-bottom: 0;
+      padding: 6px 13px 6px 10px; border-radius: 999px;
+      background: rgba(255,255,255,.45); border: 1px solid rgba(255,255,255,.7);
+      transition: background .2s, color .2s, transform .28s var(--ms-spring);
+    }
+    @media (prefers-color-scheme: dark) { .src-item { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.13); } }
+    .src-item:hover { background: rgba(255,255,255,.8); color: var(--ms-ink); }
+    .src-item:active { transform: scale(.96); }
+    .src-item:has(input:checked) { color: var(--ms-ink); font-weight: 600; background: rgba(255,255,255,.85); }
+    .src-item input[type=checkbox] { width: 15px; height: 15px; margin: 0; accent-color: var(--ms-brand); cursor: pointer; }
+
+    /* 首次同步条数 */
     .lim-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-    .lim-row .lim-name { flex: 1; font-size: 13px; color: #555; }
-    .lim-row input[type=number] { width: 78px; margin-bottom: 0; text-align: center; }
-    .lim-row .lim-unit { font-size: 12px; color: #bbb; width: 42px; }
+    .lim-row .lim-name { flex: 1; font-size: 13px; color: var(--ms-ink-2); }
+    .lim-row input[type=number] { width: 82px; margin-bottom: 0; text-align: center; }
+    .lim-row .lim-unit { font-size: 12px; color: var(--ms-ink-3); width: 44px; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1 data-i18n="optionsTitle">MarkSync · 设置</h1>
+  <div class="ms-bg"></div>
+  <div class="wrap ms-glass">
+    <div class="head">
+      <img src="../icons/128.png" alt="">
+      <h1 data-i18n="optionsTitle">MarkSync · 设置</h1>
+    </div>
 
     <h2 data-i18n="optSecInterval">检测策略</h2>
     <div class="row">

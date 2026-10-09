@@ -391,12 +391,6 @@
   "obLimitFootnote": {
     "message": "上限 100 条。这个设置只对第一次同步生效。"
   },
-  "obDoneTitle": {
-    "message": "准备好了"
-  },
-  "obDoneDesc": {
-    "message": "已选择 $1 个平台。点下面的按钮开始第一次同步。"
-  },
   "obBtnStartSync": {
     "message": "开始同步"
   },
@@ -423,5 +417,35 @@
   },
   "optBtnOnboarding": {
     "message": "重新打开新手引导"
+  },
+  "obFreqTitle": {
+    "message": "你希望多久同步一次"
+  },
+  "obFreqDesc": {
+    "message": "后台会按这个间隔去各平台看有没有新收藏。发现有新增就提醒你，不用自己一个个翻。"
+  },
+  "obFreqNote": {
+    "message": "之后可以在设置页随时改。"
+  },
+  "freq30m": {
+    "message": "每 30 分钟"
+  },
+  "freq1h": {
+    "message": "每小时"
+  },
+  "freq3h": {
+    "message": "每 3 小时"
+  },
+  "freq6h": {
+    "message": "每 6 小时"
+  },
+  "freq12h": {
+    "message": "每 12 小时"
+  },
+  "freq1d": {
+    "message": "每天一次"
+  },
+  "obSyncedNone": {
+    "message": "还没拉到内容——可能你还没在任何平台登录。登录后再点一次同步就行。"
   }
 }
