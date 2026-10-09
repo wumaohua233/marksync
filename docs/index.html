@@ -94,7 +94,7 @@
       <p class="lead" data-i18n="upLead">扩展会自己检查新版本，有新版本时弹出提示。更新有两条路：</p>
       <div class="step"><div class="idx">A</div><div class="body">
         <div class="t" data-i18n="upCmdT">命令行（最省事，推荐）</div>
-        <div class="d" data-i18n="upCmdD">装的时候用 git clone，以后一条命令更新，Chrome 会自动重新加载。</div>
+        <div class="d" data-i18n="upCmdD">装的时候用 git clone，以后一条命令更新。更新完回扩展页点一下刷新图标即可生效。</div>
 <pre><code><span class="c"># <span data-i18n="upCmdInstall">首次安装</span></span>
 git clone https://github.com/wumaohua233/marksync.git ~/marksync
 
@@ -103,9 +103,9 @@ cd ~/marksync &amp;&amp; git pull</code></pre>
       </div></div>
       <div class="step"><div class="idx">B</div><div class="body">
         <div class="t" data-i18n="upManT">手动覆盖</div>
-        <div class="d" data-i18n="upManD">下载新 zip，解压后覆盖到原来那个文件夹。Chrome 会监视文件变化并自动重载，不用回扩展页点刷新。</div>
+        <div class="d" data-i18n="upManD">下载新 zip，解压后覆盖到原来那个文件夹（系统问「替换」就点替换），然后回 chrome://extensions 点一下 MarkSync 卡片上的刷新图标。</div>
       </div></div>
-      <div class="callout" data-i18n="upNote">🔒 更新不会动你的数据 —— 清单和已读记录都存在浏览器里，和扩展文件夹无关。</div>
+      <div class="callout" data-i18n="upNote">🔒 不用卸载旧的，覆盖就行。扩展 ID 是固定的，所以清单和已读记录不会丢 —— 它们存在浏览器里，不在扩展文件夹里。</div>
     </section>
 
     <section>
@@ -155,11 +155,11 @@ const I18N = {
     upTitle: "装了旧版怎么更新",
     upLead: "扩展会自己检查新版本，有新版本时弹出提示。更新有两条路：",
     upCmdT: "命令行（最省事，推荐）",
-    upCmdD: "装的时候用 git clone，以后一条命令更新，Chrome 会自动重新加载。",
+    upCmdD: "装的时候用 git clone，以后一条命令更新。更新完回扩展页点一下刷新图标即可生效。",
     upCmdInstall: "首次安装", upCmdUpdate: "以后更新",
     upManT: "手动覆盖",
-    upManD: "下载新 zip，解压后覆盖到原来那个文件夹。Chrome 会监视文件变化并自动重载，不用回扩展页点刷新。",
-    upNote: "🔒 更新不会动你的数据 —— 清单和已读记录都存在浏览器里，和扩展文件夹无关。",
+    upManD: "下载新 zip，解压后覆盖到原来那个文件夹（系统问「替换」就点替换），然后回 chrome://extensions 点一下 MarkSync 卡片上的刷新图标。",
+    upNote: "🔒 不用卸载旧的，覆盖就行。扩展 ID 是固定的，所以清单和已读记录不会丢 —— 它们存在浏览器里，不在扩展文件夹里。",
     featTitle: "它能做什么",
     featLead: "6 个平台的收藏/点赞，后台悄悄同步，攒成一份待看清单。",
     f1t: "🔔 后台自动同步", f1d: "定时检查各平台新收藏，角标 + 通知提醒，不用你手动翻。",
@@ -189,11 +189,11 @@ const I18N = {
     upTitle: "Updating from an older version",
     upLead: "The extension checks for new releases itself and shows a banner when one is out. Two ways to update:",
     upCmdT: "Command line (easiest)",
-    upCmdD: "Install with git clone, then a single command keeps you current. Chrome reloads it automatically.",
+    upCmdD: "Install with git clone, then a single command keeps you current. After pulling, hit the reload icon on the extension card.",
     upCmdInstall: "Install", upCmdUpdate: "Update later",
     upManT: "Manual overwrite",
-    upManD: "Download the new zip and unzip it over the same folder. Chrome watches for file changes and reloads the extension for you — no need to go back to the extensions page.",
-    upNote: "🔒 Updating won't touch your data — the list and read history live in the browser, not in the extension folder.",
+    upManD: "Download the new zip and unzip it over the same folder (click Replace when your OS asks), then hit the reload icon on the MarkSync card in chrome://extensions.",
+    upNote: "🔒 No need to remove the old install — just overwrite it. The extension ID is fixed, so your list and read history stay put: they live in the browser, not in the extension folder.",
     featTitle: "What it does",
     featLead: "Saves and likes from six platforms, quietly synced into one list.",
     f1t: "🔔 Syncs in the background", f1d: "Checks for new saves on a schedule and pings you with a badge and a notification.",
@@ -223,11 +223,11 @@ const I18N = {
     upTitle: "旧バージョンからの更新",
     upLead: "拡張機能が自分で新バージョンを確認し、あれば通知します。更新方法は 2 通り：",
     upCmdT: "コマンドライン（いちばん簡単）",
-    upCmdD: "git clone でインストールしておけば、コマンド 1 つで更新できます。Chrome が自動で再読み込みします。",
+    upCmdD: "git clone でインストールしておけば、コマンド 1 つで更新できます。更新後は拡張機能ページで再読み込みアイコンを押してください。",
     upCmdInstall: "初回インストール", upCmdUpdate: "以降の更新",
     upManT: "手動で上書き",
-    upManD: "新しい zip をダウンロードし、同じフォルダに上書き解凍します。Chrome はファイルの変更を監視して自動で再読み込みするので、拡張機能ページに戻る必要はありません。",
-    upNote: "🔒 更新してもデータは消えません。リストと既読履歴はブラウザ側に保存されており、拡張機能のフォルダとは無関係です。",
+    upManD: "新しい zip を同じフォルダに上書き解凍し（「置き換え」を選ぶ）、chrome://extensions の MarkSync カードの再読み込みアイコンを押します。",
+    upNote: "🔒 古いほうを削除する必要はありません。上書きするだけで大丈夫です。拡張機能 ID は固定なので、リストと既読履歴はそのまま残ります（ブラウザ側に保存されています）。",
     featTitle: "できること",
     featLead: "6 つのプラットフォームの保存といいねを、裏で静かに同期してひとつのリストに。",
     f1t: "🔔 バックグラウンドで自動同期", f1d: "定期的に新着を確認し、バッジと通知で知らせます。手動で探す必要はありません。",
