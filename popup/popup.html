@@ -10,7 +10,8 @@
     img, svg, canvas { display: block; max-width: 100%; }
     header { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #eee; padding: 12px 14px; z-index: 10; }
     .title-row { display: flex; align-items: center; justify-content: space-between; }
-    h1 { font-size: 15px; font-weight: 600; }
+    h1 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+    .brand-ico { width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0; }
     .unread { background: #FF2442; color: #fff; font-size: 11px; border-radius: 9px; padding: 1px 8px; margin-left: 6px; }
     .actions { display: flex; gap: 6px; }
     button { border: 1px solid #ddd; background: #fff; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; color: #333; }
@@ -82,7 +83,7 @@
   <div class="popup-root">
   <header>
     <div class="title-row">
-      <h1><span data-i18n="extName">MarkSync</span><span class="unread" id="unread" style="display:none"></span></h1>
+      <h1><img class="brand-ico" src="../icons/32.png" alt=""><span data-i18n="extName">MarkSync</span><span class="unread" id="unread" style="display:none"></span></h1>
       <div class="actions">
         <button id="btn-export" data-i18n="btnExport">导出</button>
         <button id="btn-read-all" data-i18n="btnReadAll">全部已读</button>

@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 <title>MarkSync — 收藏点赞同步</title>
 <meta name="description" content="自动同步小红书/抖音/YouTube/X/TikTok/Instagram 的收藏与点赞新增。纯本地、开源、不上传任何数据。">
 <style>
@@ -13,7 +15,7 @@
   a { color: inherit; }
 
   .hero { background: linear-gradient(160deg, #FFF1EC 0%, #FFE0D6 100%); padding: 56px 0 52px; text-align: center; position: relative; }
-  .logo { font-size: 46px; }
+  .logo { width: 76px; height: 76px; border-radius: 20px; display: inline-block; box-shadow: 0 14px 30px -10px rgba(255,36,66,.45); }
   h1 { font-size: 40px; font-weight: 800; margin: 12px 0 10px; letter-spacing: 1px; }
   .sub { font-size: 17px; color: var(--gray); max-width: 540px; margin: 0 auto 6px; }
   .sub em { font-style: normal; color: var(--red); font-weight: 600; }
@@ -67,7 +69,7 @@
   <div class="hero">
     <div class="wrap">
       <div class="langs" id="langs"></div>
-      <div class="logo">📌</div>
+      <img class="logo" src="icon.png" alt="MarkSync" width="76" height="76">
       <h1 data-i18n="name">MarkSync</h1>
       <p class="sub" data-i18n-html="tagline">自动同步你在各平台的<em>收藏与点赞</em>，攒成一份待看清单 —— 专治"刷到就收藏，收藏就吃灰"。</p>
       <a class="dl" id="dl" href="https://github.com/wumaohua233/marksync/releases/latest">⬇ <span data-i18n="dl">下载插件</span></a>
