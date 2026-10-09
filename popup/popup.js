@@ -372,7 +372,7 @@ $("btn-export").addEventListener("click", exportCsv);
 async function renderUpdateBar() {
   let info;
   try {
-    info = await checkUpdate();
+    info = await checkUpdate(true); // 每次开弹窗都回源，别拿缓存糊弄用户
   } catch (_) {
     return;
   }
@@ -381,7 +381,7 @@ async function renderUpdateBar() {
     bar.hidden = true;
     return;
   }
-  $("update-text").textContent = t("updateAvailable", "v" + info.latest);
+  $("update-text").textContent = t("updateAvailable", "v" + info.latest, "v" + info.current);
   $("update-go").textContent = t("updateNow");
   $("update-dismiss").title = t("updateDismiss");
   bar.hidden = false;

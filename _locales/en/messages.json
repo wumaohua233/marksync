@@ -320,7 +320,7 @@
     "message": "Post by $1"
   },
   "updateAvailable": {
-    "message": "Version $1 is available"
+    "message": "Version $1 is available (you have $2)"
   },
   "updateNow": {
     "message": "Update"

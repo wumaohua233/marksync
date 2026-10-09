@@ -320,7 +320,7 @@
     "message": "$1 的推文"
   },
   "updateAvailable": {
-    "message": "有新版本 $1"
+    "message": "有新版本 $1（当前 $2）"
   },
   "updateNow": {
     "message": "去更新"

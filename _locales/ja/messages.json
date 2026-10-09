@@ -320,7 +320,7 @@
     "message": "$1 の投稿"
   },
   "updateAvailable": {
-    "message": "バージョン $1 が利用可能です"
+    "message": "バージョン $1 が利用可能です（現在 $2）"
   },
   "updateNow": {
     "message": "更新する"
